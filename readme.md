@@ -57,3 +57,45 @@ logs/
 
 scripts/
 ```
+
+
+---
+ (Frontend Structure)
+app/
+├── (auth)/
+│   ├── login/
+│   └── layout.tsx
+│
+├── (dashboard)/
+│   ├── dashboard/
+│   ├── tickets/
+│   │   ├── page.tsx
+│   │   └── [ticketId]/
+│   ├── admin/
+│   └── layout.tsx
+│
+├── globals.css
+├── layout.tsx
+└── page.tsx
+
+components/
+├── ui/
+├── auth/
+├── tickets/
+├── admin/
+├── layout/
+└── shared/
+
+hooks/
+└──
+
+types/
+├── ticket.ts
+├── user.ts
+├── message.ts
+└── index.ts
+
+public/
+├── images/
+├── icons/
+└── assets/
