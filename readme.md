@@ -1,111 +1,164 @@
-# Ticket System for Freshworks
+# Freshworks Ticket System
 
-## Backend Folder Structure
+A full-stack ticket management application built with Next.js, TypeScript, Prisma, and PostgreSQL. The platform is designed to support a role-based workflow for support teams, allowing admins and agents to manage tickets, assign ownership, and track conversations efficiently.
 
-```text
-app/
-└── api/
-    ├── auth/
-    ├── tickets/
-    ├── users/
-    ├── messages/
-    └── admin/
+## Overview
 
-lib/
-├── prisma.ts
-├── auth.ts
-├── db.ts
-└── utils.ts
+This project aims to simplify support operations by providing a structured system for:
 
-prisma/
-├── schema.prisma
-├── migrations/
-└── seed.ts
-
-services/
-├── auth.service.ts
-├── ticket.service.ts
-├── user.service.ts
-├── message.service.ts
-└── admin.service.ts
-
-repositories/
-├── ticket.repository.ts
-├── user.repository.ts
-└── message.repository.ts
-
-validators/
-├── auth.validator.ts
-├── ticket.validator.ts
-└── user.validator.ts
-
-middleware/
-├── auth.middleware.ts
-├── role.middleware.ts
-└── error.middleware.ts
-
-constants/
-├── roles.ts
-├── status.ts
-└── permissions.ts
-
-config/
-├── env.ts
-└── database.ts
-
-logs/
-
-scripts/
-```
-
----
-## Project Overview
-
-This project is a full-stack ticketing system built for Freshworks to help support agents manage customer issues efficiently. The application focuses on a simple, role-based workflow for handling tickets, sending responses, and managing assignments.
+- creating and tracking support tickets
+- assigning tickets to specific agents
+- managing ticket status through a clear workflow
+- storing ticket conversations through message history
+- supporting future expansion with a scalable backend structure
 
 ## Problem Statement
 
-Freshworks wants a ticket system where agents can view open tickets one page at a time. When an agent replies to a ticket, the new message should appear instantly while the message is being sent in the background. Agents should only be able to view tickets assigned to them, and admins should be able to reassign tickets as needed.
+Freshworks requires a ticketing system where support agents can work within a controlled environment that supports secure role-based access. Tickets should be easy to assign, update, and monitor, while admins can manage workflow and reassignment effectively.
+
+## Key Features
+
+- Role-based access for Admin and Agent users
+- Ticket assignment and status tracking
+- Message-based conversation history for each ticket
+- Prisma-powered database modeling for users, tickets, and messages
+- Modern frontend foundation built with Next.js and React
 
 ## Tech Stack
 
-- Frontend: Next.js
-- Backend: Next.js API routes and server-side logic
+- Frontend: Next.js, React, TypeScript
+- Styling: Tailwind CSS
+- Backend: Next.js server-side logic
 - Database: PostgreSQL
 - ORM: Prisma
-- Cloud Platform: Google Cloud Platform (GCP)
+- Authentication helpers: bcrypt and JSON Web Token
 
-## Features
+## Project Structure
 
-- Paginated view of open tickets
-- Instant display of new replies after submission
-- Role-based access for agents and admins
-- Ticket assignment and reassignment
-- Clean API structure for authentication, tickets, and messaging
+```text
+src/
+├── app/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+prisma/
+├── schema.prisma
+public/
+package.json
+tsconfig.json
+next.config.ts
+postcss.config.mjs
+prisma.config.ts
+```
 
-## Team Members
+## Database Model
 
-- Om Jagtap — Backend Web Development
-- Aayushman Shukla — Middleware, Testing, Deployment
-- Shruti Itkalkar — Frontend Web Development
+The current Prisma schema includes the following core models:
+
+- User
+- Ticket
+- Message
+
+These models support role-based user access, ticket assignment, and ticket conversation history.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18 or higher
+- npm or yarn
+- PostgreSQL database
+
+### Installation
+
+1. Clone the repository
+
+   ```
+
+   bash
+   git clone <repository-url>
+   cd S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system
+   ```
+
+2. Install dependencies
+
+   ```
+
+   bash
+   npm install
+   ```
+
+3. Create a environment file
+
+   ```
+
+   bash
+   touch .env
+   ```
+
+4. Add your database connection string
+
+   ```
+
+   bash
+   env
+   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+   ```
+
+5. Generate Prisma client
+
+   ```
+
+   bash
+   npx prisma generate
+   ```
+
+6. Run database migrations
+
+   ```
+
+   bash
+   npx prisma migrate dev --name init
+   ```
+
+7. Start the development server
+
+   ```
+
+   bash
+   npm run dev
+   ```
+
+### Useful Commands
+
+```bash
+npm run build
+npm run lint
+npx prisma studio
+```
+
+## Team
+
+- Om Jagtap — Backend Development
+- Aayushman Shukla — Middleware, Testing, and Deployment
+- Shruti Itkalkar — Frontend Development
 
 ## Contribution Guidelines
 
-1. Fork the repository and create a new branch for your work.
-2. Use clear branch names such as feature/your-feature, fix/bug-name, or docs/update-readme.
-3. Make small, focused changes and keep commits descriptive.
-4. Test your changes before pushing them.
-5. Open a pull request with a short summary of what was changed.
-6. Avoid pushing directly to the main branch.
+1. Fork the repository and create a feature or fix branch.
+2. Use clear branch names such as `feature/your-feature` or `fix/bug-name`.
+3. Keep changes focused and documented.
+4. Test your work before pushing.
+5. Open a pull request with a concise summary of your changes.
 
 ## Git Workflow
 
-- main: stable branch for production-ready code
-- feature/*: new feature development
-- fix/*: bug fixes and improvements
-- docs/*: documentation updates
+- `main` — stable production-ready branch
+- `feature/*` — new feature development
+- `fix/*` — bug fixes and improvements
+- `docs/*` — documentation updates
 
-Example workflow:
+Example:
 
 ```bash
 git checkout -b feature/your-feature-name
@@ -113,45 +166,3 @@ git add .
 git commit -m "Add your feature"
 git push origin feature/your-feature-name
 ```
-
----
-(Frontend Structure)
-
-```app/
-├── (auth)/
-│   ├── login/
-│   └── layout.tsx
-│
-├── (dashboard)/
-│   ├── dashboard/
-│   ├── tickets/
-│   │   ├── page.tsx
-│   │   └── [ticketId]/
-│   ├── admin/
-│   └── layout.tsx
-│
-├── globals.css
-├── layout.tsx
-└── page.tsx
-
-components/
-├── ui/
-├── auth/
-├── tickets/
-├── admin/
-├── layout/
-└── shared/
-
-hooks/
-└──
-
-types/
-├── ticket.ts
-├── user.ts
-├── message.ts
-└── index.ts
-
-public/
-├── images/
-├── icons/
-└── assets/
