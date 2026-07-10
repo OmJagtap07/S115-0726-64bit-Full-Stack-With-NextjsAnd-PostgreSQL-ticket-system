@@ -22,11 +22,11 @@ Freshworks requires a ticketing system where support agents can work within a co
 - Ticket assignment and status tracking
 - Message-based conversation history for each ticket
 - Prisma-powered database modeling for users, tickets, and messages
-- Modern frontend foundation built with Next.js and React
+- Modern frontend foundation built with Next.js and TypeScript
 
 ## Tech Stack
 
-- Frontend: Next.js, React, TypeScript
+- Frontend: Next.js, TypeScript
 - Styling: Tailwind CSS
 - Backend: Next.js server-side logic
 - Database: PostgreSQL
@@ -60,82 +60,6 @@ The current Prisma schema includes the following core models:
 - Message
 
 These models support role-based user access, ticket assignment, and ticket conversation history.
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18 or higher
-- npm or yarn
-- PostgreSQL database
-
-### Installation
-
-1. Clone the repository
-
-   ```
-
-   bash
-   git clone <repository-url>
-   cd S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system
-   ```
-
-2. Install dependencies
-
-   ```
-
-   bash
-   npm install
-   ```
-
-3. Create a environment file
-
-   ```
-
-   bash
-   touch .env
-   ```
-
-4. Add your database connection string
-
-   ```
-
-   bash
-   env
-   DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-   ```
-
-5. Generate Prisma client
-
-   ```
-
-   bash
-   npx prisma generate
-   ```
-
-6. Run database migrations
-
-   ```
-
-   bash
-   npx prisma migrate dev --name init
-   ```
-
-7. Start the development server
-
-   ```
-
-   bash
-   npm run dev
-   ```
-
-### Useful Commands
-
-```bash
-npm run build
-npm run lint
-npx prisma studio
-```
 
 ## Team
 
