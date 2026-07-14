@@ -7,23 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User Model
-// Stores agents and administrators
+enum Role {
+  ADMIN
+  AGENT
+  CUSTOMER
+}
 
 model User {
-  id String @id @default(cuid())
-}
-
-// Ticket Model
-// Stores customer support tickets
-
-model Ticket {
-  id String @id @default(cuid())
-}
-
-// Message Model
-// Stores ticket replies
-
-model Message {
-  id String @id @default(cuid())
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(CUSTOMER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
