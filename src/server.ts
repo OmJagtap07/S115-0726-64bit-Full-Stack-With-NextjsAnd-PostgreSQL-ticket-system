@@ -1,15 +1,25 @@
+import http from 'http';
 import app from './app';
-import { env } from './config/env.config';
+import { config } from './config';
+// import { initSocket } from './core/sockets'; // Will implement later
 
-const startServer = () => {
-  try {
-    app.listen(env.PORT, () => {
-      console.log(`Server is running on port ${env.PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
+const server = http.createServer(app);
 
-startServer();
+// Initialize Socket.IO
+// initSocket(server);
+
+const PORT = config.PORT;
+
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT} in ${config.NODE_ENV} mode.`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    console.log('HTTP server closed');
+    // TODO: close DB, Redis connections
+    process.exit(0);
+  });
+});
