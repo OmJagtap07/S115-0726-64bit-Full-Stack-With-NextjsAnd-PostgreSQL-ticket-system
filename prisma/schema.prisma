@@ -4,13 +4,35 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum Role {
   ADMIN
   AGENT
   CUSTOMER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ActivityType {
+  CREATED
+  ASSIGNED
+  REASSIGNED
+  STATUS_CHANGED
+  CLOSED
+  REOPENED
 }
 
 model User {
@@ -23,7 +45,11 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  sessions     Session[]
+  sessions       Session[]
+  ticketsCreated Ticket[]         @relation("CustomerTickets")
+  ticketsAssigned Ticket[]        @relation("AssignedTickets")
+  replies        TicketReply[]
+  activities     TicketActivity[]
 }
 
 model Session {
@@ -37,4 +63,79 @@ model Session {
   updatedAt        DateTime @updatedAt
 
   @@index([userId])
+}
+
+model Ticket {
+  id           String       @id @default(uuid())
+  ticketNumber String       @unique // e.g., TKT-1001
+  subject      String
+  description  String       @db.Text
+  status       TicketStatus @default(OPEN)
+  priority     Priority     @default(MEDIUM)
+  
+  customerId   String
+  customer     User         @relation("CustomerTickets", fields: [customerId], references: [id])
+  
+  assigneeId   String?
+  assignee     User?        @relation("AssignedTickets", fields: [assigneeId], references: [id])
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  closedAt     DateTime?
+  deletedAt    DateTime?
+
+  replies      TicketReply[]
+  attachments  Attachment[]
+  activities   TicketActivity[]
+
+  @@index([customerId])
+  @@index([assigneeId])
+  @@index([status])
+}
+
+model TicketReply {
+  id         String   @id @default(uuid())
+  ticketId   String
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  message    String   @db.Text
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  attachments Attachment[]
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+model TicketActivity {
+  id        String       @id @default(uuid())
+  ticketId  String
+  ticket    Ticket       @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?        @relation(fields: [actorId], references: [id])
+  type      ActivityType
+  details   String?      @db.Text
+  createdAt DateTime     @default(now())
+
+  @@index([ticketId])
+  @@index([actorId])
+}
+
+model Attachment {
+  id        String       @id @default(uuid())
+  ticketId  String?
+  ticket    Ticket?      @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  replyId   String?
+  reply     TicketReply? @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  
+  filename  String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime     @default(now())
+
+  @@index([ticketId])
+  @@index([replyId])
 }
