@@ -7,6 +7,7 @@ import { errorHandler } from './core/middlewares/errorHandler';
 import { logger } from './core/logger/winston';
 import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
+import ticketsRoutes from './modules/tickets/tickets.routes';
 
 const app = express();
 
@@ -43,6 +44,7 @@ import authRoutes from './modules/auth/auth.routes';
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
+app.use('/api/v1/tickets', ticketsRoutes);
 
 // Centralized Error Handling
 app.use(errorHandler);
