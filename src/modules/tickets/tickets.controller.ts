@@ -21,6 +21,7 @@ export class TicketsController {
       // Filtering logic: Agents see all (or assigned), Customers see their own
       const filters: any = { deletedAt: null };
       
+      // DAY 5: Current user middleware and filters implemented here
       if (req.user!.role === Role.CUSTOMER) {
         filters.customerId = req.user!.userId;
       }
