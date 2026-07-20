@@ -31,6 +31,14 @@ export function Sidebar({ currentRole = 'agent' }: { currentRole?: Role }) {
 
   const filteredNav = navConfig.filter(item => item.roles.includes(currentRole));
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/login';
+    }
+  };
+
   return (
     <aside className="w-64 bg-sidebar flex flex-col h-screen sticky top-0 border-r border-sidebar-border text-sidebar-foreground">
       <div className="p-6 flex items-center">
@@ -61,7 +69,7 @@ export function Sidebar({ currentRole = 'agent' }: { currentRole?: Role }) {
       <div className="p-4 border-t border-sidebar-border/10">
         <button 
           className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-sidebar-foreground/80 hover:bg-destructive/10 hover:text-destructive transition-colors"
-          onClick={() => { /* Logout handler to be added in Phase 2 */ }}
+          onClick={handleLogout}
         >
           <LogOut className="w-5 h-5" />
           Logout
