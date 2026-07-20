@@ -1,10 +1,8 @@
-import { RateLimiterRedis } from 'rate-limiter-flexible';
-import { redis } from '../cache/redis';
+import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../logger/winston';
 
-const rateLimiter = new RateLimiterRedis({
-  storeClient: redis,
+const rateLimiter = new RateLimiterMemory({
   keyPrefix: 'middleware_ratelimit',
   points: 10, // 10 requests
   duration: 1, // per 1 second by IP
@@ -27,8 +25,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 };
 
 // Specialized strict limiter for auth endpoints
-const authRateLimiter = new RateLimiterRedis({
-  storeClient: redis,
+const authRateLimiter = new RateLimiterMemory({
   keyPrefix: 'auth_ratelimit',
   points: 5, // 5 requests
   duration: 60 * 15, // per 15 minutes by IP
