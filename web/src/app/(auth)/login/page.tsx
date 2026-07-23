@@ -38,7 +38,9 @@ export default function LoginPage() {
     setIsLoading(true);
     setErrorMsg("");
     try {
-      await api.auth.login(data);
+      const response: any = await api.auth.login(data);
+      // Set the accessToken cookie so Next.js middleware can authenticate the user
+      document.cookie = `accessToken=${response.accessToken}; path=/; max-age=604800; samesite=lax`;
       window.location.href = '/dashboard';
     } catch (error: any) {
       setErrorMsg(error.message || "Invalid credentials. Please try again.");
