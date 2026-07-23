@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import { requireAuth, requireRole } from '../requireAuth';
 import { UnauthorizedError, ForbiddenError } from '../../errors/AppError';

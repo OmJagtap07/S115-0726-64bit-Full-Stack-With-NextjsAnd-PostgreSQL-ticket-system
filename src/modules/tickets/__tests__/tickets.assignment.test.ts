@@ -1,3 +1,4 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TicketsService } from '../tickets.service';
 import { PrismaTicketRepository, PrismaTicketActivityRepository } from '../../../infrastructure/repositories/PrismaRepositories';
 import { ActivityType } from '@prisma/client';
