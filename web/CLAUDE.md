@@ -1,3 +1,1 @@
-# CLAUDE
-
 @AGENTS.md
