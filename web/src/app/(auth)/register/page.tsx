@@ -23,9 +23,7 @@ const registerSchema = z.object({
     .regex(/[a-z]/, 'Must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Must contain at least one number')
     .regex(/[\W_]/, 'Must contain at least one special character'),
-  role: z.enum(['customer', 'agent', 'admin'], {
-    required_error: "Please select a role.",
-  }),
+  role: z.enum(['customer', 'agent', 'admin']),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;

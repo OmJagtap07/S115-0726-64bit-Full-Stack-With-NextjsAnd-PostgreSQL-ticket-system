@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction  } from 'express';
 import { TicketsService } from './tickets.service';
 import { Role } from '@prisma/client';
+import { logger } from '../../core/logger/winston';
 
 export class TicketsController {
   static async createTicket(req: Request, res: Response, next: NextFunction) {
@@ -14,9 +15,8 @@ export class TicketsController {
 
   static async getTickets(req: Request, res: Response, next: NextFunction) {
     try {
-      // DAY 6: Pagination and Sorting logic
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = Math.max(1, parseInt(req.query.page as string) || 1);
+      const limit = Math.max(1, parseInt(req.query.limit as string) || 10);
       const skip = (page - 1) * limit;
 
       // Filtering logic: Agents see all (or assigned), Customers see their own
@@ -101,14 +101,12 @@ export class TicketsController {
 
       const reply = await TicketsService.replyToTicket(req.params.id, req.user!.userId, req.body);
       
-      // DAY 8: Reply optimization & Background processing
-      // Offloading socket emission and email notifications to background to ensure fast response times
       setImmediate(() => {
         try {
-          // TODO: Socket.io emit or Message Queue trigger
+          // Future: Trigger Socket.io emit or Message Queue payload
+          logger.info(`Background processing initiated for ticket reply ${reply.id}`);
         } catch (bgError) {
-          // DAY 8: Error recovery - Log background task failure but don't crash request
-          console.error('Background task failed:', bgError);
+          logger.error('Background task failed during replyToTicket:', bgError);
         }
       });
 
