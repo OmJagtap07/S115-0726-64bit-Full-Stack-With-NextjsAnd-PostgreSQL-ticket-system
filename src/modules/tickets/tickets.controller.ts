@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction  } from 'express';
 import { TicketsService } from './tickets.service';
 import { Role } from '@prisma/client';
 
