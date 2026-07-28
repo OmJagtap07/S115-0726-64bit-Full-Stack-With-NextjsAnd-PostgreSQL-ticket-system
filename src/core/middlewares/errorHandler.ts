@@ -3,6 +3,8 @@ import { AppError } from '../errors/AppError';
 import { config } from '../../config';
 import { logger } from '../logger/winston';
 import httpContext from 'express-http-context';
+import { ZodError } from 'zod';
+import { Prisma } from '@prisma/client';
 
 export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
   let statusCode = 500;
@@ -13,11 +15,21 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     title = err.name || 'Application Error';
-  } else if (err.name === 'ZodError') {
+  } else if (err instanceof ZodError) {
     statusCode = 400;
     title = 'Validation Error';
     detail = 'One or more fields failed validation.';
-    validationErrors = (err as any).issues;
+    validationErrors = err.issues;
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2002') {
+      statusCode = 409;
+      title = 'Conflict';
+      detail = 'A record with this value already exists.';
+    } else {
+      statusCode = 400;
+      title = 'Database Error';
+      detail = 'A database constraint was violated.';
+    }
   }
 
   // Log error

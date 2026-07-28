@@ -1,173 +1,62 @@
 # Freshworks Ticket System
 
-A modern full-stack ticketing platform for support teams, built with Node.js, Express, TypeScript, Prisma, PostgreSQL, and Next.js. The system is designed to support role-based workflows for customer support operations, including ticket creation, assignment, status tracking, replies, and activity history.
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-## Overview
+A modern, enterprise-grade ticketing platform for support teams, built to handle role-based workflows, ticket lifecycle management, and real-time collaboration.
 
-This repository contains a monorepo-style implementation with:
+## 📖 Documentation Directory
 
-- a backend API for ticket and user management
-- a responsive frontend dashboard for agents and admins
-- a Prisma-based data model for tickets, users, sessions, replies, and activity logs
-- PostgreSQL-backed persistence with Docker support for local development
+We have comprehensive guides available for all aspects of the system:
+
+- 🚀 **[Installation Guide](./docs/INSTALLATION.md)** - Step-by-step instructions for setting up the project locally using Docker and Node.
+- ⚙️ **[Environment Variables](./docs/ENVIRONMENT.md)** - Detailed explanation of all configuration options.
+- 🧪 **[Testing Guide](./docs/TESTING.md)** - How to run and contribute to the Vitest test suites.
+- 🚢 **[Deployment Guide](./docs/DEPLOYMENT.md)** - Strategies for taking the application to production.
+
+## 🔌 Interactive API Documentation (Swagger)
+
+The backend features an automatically generated, interactive OpenAPI UI powered by Swagger.
+
+To access the API Docs:
+1. Ensure the backend is running (`npm run dev`).
+2. Navigate to **[http://localhost:5001/api-docs](http://localhost:5001/api-docs)** in your browser.
+
+Here, you can test endpoints (like `/auth/login` and `/auth/register-admin`) directly from the UI without needing Postman.
+
+---
 
 ## Key Features
 
-- Role-based access for Admin, Agent, and Customer users
-- Ticket lifecycle management with statuses such as Open, In Progress, Resolved, and Closed
-- Priority-based ticket handling
-- Conversation history through ticket replies
-- Activity tracking for ticket changes and assignment history
-- Secure authentication and session management using JWT
-- Rate limiting, logging, and structured error handling
-- Clean UI for managing tickets and support workflows
-
-## Tech Stack
-
-### Backend
-- Node.js + Express
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- Redis-backed caching support
-- JWT-based authentication
-- Zod for validation
-
-### Frontend
-- Next.js
-- React
-- Tailwind CSS
-- shadcn/ui components
-
-### Developer Tools
-- Docker Compose
-- Prisma Studio / Prisma Migrate
-- Vitest for backend testing
+- **Role-Based Workflows:** Distinct permissions and views for Admins, Agents, and Customers.
+- **Ticket Lifecycle:** Manage tickets through statuses (Open, In Progress, Resolved, Closed) with priorities.
+- **Audit Trails:** Immutable activity tracking for ticket changes and assignments.
+- **Secure Authentication:** JWT-based stateless auth backed by HTTP-only refresh tokens.
+- **Clean Architecture:** Modular monolith backend design paired with a responsive Next.js frontend.
 
 ## Project Structure
 
 ```text
 .
-├── prisma/                  # Prisma schema, migrations, and seed data
-├── src/                     # Backend application source
-│   ├── modules/             # Auth, user, and ticket modules
-│   ├── core/               # Shared infrastructure and middleware
-│   └── server.ts           # Application entry point
-├── web/                     # Next.js frontend application
-├── docker-compose.yml      # PostgreSQL container configuration
-├── package.json             # Backend scripts and dependencies
-└── readme.md                # Project documentation
+├── docs/                    # Detailed technical guides
+├── prisma/                  # Database schema, migrations, and seed data
+├── src/                     # Backend API application
+│   ├── modules/             # Business logic (Auth, Users, Tickets)
+│   ├── core/                # Infrastructure (Middlewares, Logger, Swagger)
+│   └── server.ts            # Entry point
+├── web/                     # Next.js Frontend
+└── docker-compose.yml       # Infrastructure orchestration
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 20+
-- npm or pnpm
-- Docker Desktop
-
-### 1. Clone the repository
-
-```bash
-git clone <repository-url>
-cd S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system
-```
-
-### 2. Install dependencies
-
-```bash
-npm install
-cd web
-npm install
-cd ..
-```
-
-### 3. Start the database
-
-```bash
-docker compose up -d postgres
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project root with the following values:
-
-```env
-PORT=8080
-NODE_ENV=development
-DATABASE_URL="postgresql://cstms_user:cstms_password@localhost:5432/cstms_db"
-REDIS_URL="redis://localhost:6379"
-JWT_SECRET="your_jwt_secret"
-JWT_EXPIRES_IN="15m"
-JWT_REFRESH_SECRET="your_refresh_secret"
-JWT_REFRESH_EXPIRES_IN="7d"
-```
-
-### 5. Run Prisma setup
-
-```bash
-npx prisma generate
-npx prisma migrate dev --name init
-npx prisma db seed
-```
-
-### 6. Start the applications
-
-Run the backend:
-
-```bash
-npm run dev
-```
-
-Run the frontend in a separate terminal:
-
-```bash
-cd web
-npm run dev
-```
-
-The backend will run on `http://localhost:8080` and the frontend on `http://localhost:3000`.
-
-## Database Model
-
-The Prisma schema includes the following core models:
-
-- `User` for authentication and role management
-- `Session` for refresh token handling
-- `Ticket` for support requests and lifecycle state
-- `TicketReply` for threaded communication
-- `TicketActivity` for audit/history tracking
-- `Attachment` for file support
-
-## Available Scripts
-
-### Backend
-- `npm run dev` — start the backend in development mode
-- `npm run build` — build the server for production
-- `npm run start` — start the compiled server
-- `npm test` — run backend tests
-
-### Frontend
-- `cd web && npm run dev` — start the Next.js app
-- `cd web && npm run build` — create a production build
-- `cd web && npm run lint` — run ESLint checks
-
-## Contribution Guidelines
-
-1. Fork the repository and create a feature branch.
-2. Use descriptive branch names such as `feature/your-feature` or `fix/bug-name`.
-3. Keep changes focused and document significant updates.
-4. Test your changes locally before opening a pull request.
-5. Submit a pull request with a clear summary of the change.
 
 ## Team
 
-- Om Jagtap — Backend Development
-- Aayushman Shukla — Middleware, Testing, and Deployment
-- Shruti Itkalkar — Frontend Development
+- **Om Jagtap** — Backend Architecture & Refactoring
+- **Aayushman Shukla** — Middleware, Testing, and Deployment
+- **Shruti Itkalkar** — Frontend Development
 
 ## License
 
 This project is licensed under the ISC License.
-
