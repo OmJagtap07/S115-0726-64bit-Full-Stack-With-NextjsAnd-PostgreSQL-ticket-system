@@ -211,6 +211,7 @@ export default function TicketsPage() {
           <div className="relative w-full lg:w-72 shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input 
+              aria-label="Search tickets"
               placeholder="Search by ID, Subject, Customer..." 
               className="pl-9 h-10 bg-background"
               value={searchQuery}
@@ -236,7 +237,7 @@ export default function TicketsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v || 'ALL')}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Agent" />
               </SelectTrigger>
