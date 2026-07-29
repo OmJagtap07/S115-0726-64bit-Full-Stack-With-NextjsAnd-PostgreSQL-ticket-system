@@ -157,7 +157,7 @@ export default function TicketDetailsPage() {
       
       {/* Top Action Bar */}
       <div className="flex items-center justify-between border-b border-border bg-card p-4 sm:rounded-t-xl shrink-0">
-        <Link href="/dashboard/tickets" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors">
+        <Link href="/dashboard/tickets" aria-label="Go back to my tickets" className="text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors">
           <ArrowLeft className="w-4 h-4" />
           Back to My Tickets
         </Link>
