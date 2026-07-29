@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
 import { TicketStatus } from '@prisma/client';
 
@@ -25,6 +25,7 @@ export default function TicketDetailsPage() {
   
   // To manually trigger failure for testing the Error state
   const [forceFail, setForceFail] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Queries
   const { data: ticket, isLoading: isLoadingTicket, isError: isErrorTicket } = useQuery({
@@ -124,6 +125,8 @@ export default function TicketDetailsPage() {
       queryClient.setQueryData(['ticket', ticketId], data);
       queryClient.invalidateQueries({ queryKey: ['ticket', ticketId] });
       queryClient.invalidateQueries({ queryKey: ['tickets'] }); // invalidate list
+      setToastMessage(`Status updated to ${data.status.replace('_', ' ')} successfully.`);
+      setTimeout(() => setToastMessage(null), 3000);
     }
   });
 
@@ -153,7 +156,15 @@ export default function TicketDetailsPage() {
   const priorityLabel = ticket.priority.charAt(0) + ticket.priority.slice(1).toLowerCase();
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] -m-6 sm:m-0 sm:h-auto">
+    <div className="flex flex-col h-[calc(100vh-5rem)] -m-6 sm:m-0 sm:h-auto relative">
+      
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="absolute top-4 right-4 bg-foreground text-background text-xs px-3 py-1.5 rounded-md flex items-center gap-1.5 shadow-lg z-50 animate-in fade-in slide-in-from-top-1">
+          <Check className="w-3.5 h-3.5 text-success" />
+          {toastMessage}
+        </div>
+      )}
       
       {/* Top Action Bar */}
       <div className="flex items-center justify-between border-b border-border bg-card p-4 sm:rounded-t-xl shrink-0">
