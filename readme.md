@@ -1,15 +1,16 @@
 # Freshworks Ticket System
 
-A modern full-stack ticketing platform for support teams, built with Node.js, Express, TypeScript, Prisma, PostgreSQL, and Next.js. The system is designed to support role-based workflows for customer support operations, including ticket creation, assignment, status tracking, replies, and activity history.
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-## Overview
+A modern, enterprise-grade ticketing platform for support teams, built to handle role-based workflows, ticket lifecycle management, and real-time collaboration.
 
-This repository contains a monorepo-style implementation with:
+## 📖 Documentation Directory
 
-- a backend API for ticket and user management
-- a responsive frontend dashboard for agents and admins
-- a Prisma-based data model for tickets, users, sessions, replies, and activity logs
-- PostgreSQL-backed persistence with Docker support for local development
+We have comprehensive guides available for all aspects of the system:
 
 ## Key Features
 
@@ -112,7 +113,7 @@ npm install
 cd ..
 ```
 
-### 5. Run Prisma setup
+Here, you can test endpoints (like `/auth/login` and `/auth/register-admin`) directly from the UI without needing Postman.
 
 Generate the Prisma Client types for TypeScript and initialize the database.
 
@@ -133,15 +134,24 @@ npx prisma db seed
 
 Run the backend from the project root:
 
-```bash
-npm run dev
-```
+- **Role-Based Workflows:** Distinct permissions and views for Admins, Agents, and Customers.
+- **Ticket Lifecycle:** Manage tickets through statuses (Open, In Progress, Resolved, Closed) with priorities.
+- **Audit Trails:** Immutable activity tracking for ticket changes and assignments.
+- **Secure Authentication:** JWT-based stateless auth backed by HTTP-only refresh tokens.
+- **Clean Architecture:** Modular monolith backend design paired with a responsive Next.js frontend.
 
-Run the frontend in a separate terminal:
+## Project Structure
 
-```bash
-cd web
-npm run dev
+```text
+.
+├── docs/                    # Detailed technical guides
+├── prisma/                  # Database schema, migrations, and seed data
+├── src/                     # Backend API application
+│   ├── modules/             # Business logic (Auth, Users, Tickets)
+│   ├── core/                # Infrastructure (Middlewares, Logger, Swagger)
+│   └── server.ts            # Entry point
+├── web/                     # Next.js Frontend
+└── docker-compose.yml       # Infrastructure orchestration
 ```
 
 The backend API will run on `http://localhost:5001` and the frontend UI on `http://localhost:3000`.
@@ -180,11 +190,10 @@ The Prisma schema includes the following core models:
 
 ## Team
 
-- Om Jagtap — Backend Development
-- Aayushman Shukla — Middleware, Testing, and Deployment
-- Shruti Itkalkar — Frontend Development
+- **Om Jagtap** — Backend Architecture & Refactoring
+- **Aayushman Shukla** — Middleware, Testing, and Deployment
+- **Shruti Itkalkar** — Frontend Development
 
 ## License
 
 This project is licensed under the ISC License.
-

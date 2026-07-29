@@ -8,6 +8,8 @@ import { logger } from './core/logger/winston';
 import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
 import ticketsRoutes from './modules/tickets/tickets.routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './core/swagger';
 
 const app = express();
 
@@ -39,8 +41,7 @@ app.get('/ready', (req, res) => {
   res.status(200).json({ status: 'ready', timestamp: new Date().toISOString() });
 });
 
-import authRoutes from './modules/auth/auth.routes';
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteTitle: 'CSTMS API Docs' }));
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
