@@ -2,39 +2,11 @@ import { Router } from 'express';
 import { AuthController } from './auth.controller';
 import { validateRequest } from '../../core/middlewares/validateRequest';
 import { authRateLimitMiddleware } from '../../core/middlewares/rateLimiter';
-import { loginSchema, registerAdminSchema, refreshTokenSchema } from './auth.dto';
+import { loginSchema, registerSchema, registerAdminSchema, refreshTokenSchema } from './auth.dto';
 
 const router = Router();
 
-/**
- * @swagger
- * /auth/register-admin:
- *   post:
- *     summary: Register a new admin user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *               - name
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               name:
- *                 type: string
- *               role:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- */
+router.post('/register', authRateLimitMiddleware, validateRequest(registerSchema), AuthController.register);
 router.post('/register-admin', authRateLimitMiddleware, validateRequest(registerAdminSchema), AuthController.registerAdmin);
 /**
  * @swagger

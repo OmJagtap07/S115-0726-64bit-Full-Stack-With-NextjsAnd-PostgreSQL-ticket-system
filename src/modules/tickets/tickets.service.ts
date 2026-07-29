@@ -96,6 +96,12 @@ export class TicketsService {
     return updated;
   }
 
+  static async getReplies(ticketId: string) {
+    const ticket = await ticketRepo.findById(ticketId);
+    if (!ticket) throw new NotFoundError('Ticket not found');
+    return replyRepo.findAllByTicket(ticketId);
+  }
+
   static async replyToTicket(ticketId: string, userId: string, data: ReplyTicketDto) {
     const ticket = await ticketRepo.findById(ticketId);
     if (!ticket) throw new NotFoundError('Ticket not found');
