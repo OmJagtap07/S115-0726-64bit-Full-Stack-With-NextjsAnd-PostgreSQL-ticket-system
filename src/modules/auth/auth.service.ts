@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../../config';
 import { BadRequestError, UnauthorizedError } from '../../core/errors/AppError';
-import { RegisterAdminDto, LoginDto, RefreshTokenDto } from './auth.dto';
+import { RegisterAdminDto, RegisterDto, LoginDto, RefreshTokenDto } from './auth.dto';
 import { logger } from '../../core/logger/winston';
 import { PrismaUserRepository, PrismaSessionRepository } from '../../infrastructure/repositories/PrismaRepositories';
 import { Role } from '@prisma/client';
@@ -12,6 +12,27 @@ const userRepo = new PrismaUserRepository();
 const sessionRepo = new PrismaSessionRepository();
 
 export class AuthService {
+  static async register(data: RegisterDto) {
+    const { name, email, password, role } = data;
+
+    const existingUser = await userRepo.findByEmail(email);
+    if (existingUser) {
+      throw new BadRequestError('User with this email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await userRepo.create({
+      email,
+      name,
+      passwordHash: hashedPassword,
+      role: role ? (role as Role) : Role.CUSTOMER,
+      isActive: true,
+    });
+
+    return { user };
+  }
+
   static async registerAdmin(data: RegisterAdminDto) {
     const { name, email, password } = data;
 

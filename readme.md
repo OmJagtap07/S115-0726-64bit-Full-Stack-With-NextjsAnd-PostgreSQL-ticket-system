@@ -64,7 +64,7 @@ This repository contains a monorepo-style implementation with:
 ### Prerequisites
 
 - Node.js 20+
-- npm or pnpm
+- npm
 - Docker Desktop
 
 ### 1. Clone the repository
@@ -74,27 +74,12 @@ git clone <repository-url>
 cd S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system
 ```
 
-### 2. Install dependencies
+### 2. Configure environment variables
 
-```bash
-npm install
-cd web
-npm install
-cd ..
-```
-
-### 3. Start the database
-
-```bash
-docker compose up -d postgres
-```
-
-### 4. Configure environment variables
-
-Create a `.env` file in the project root with the following values:
+Create a `.env` file in the project root. This configuration will be utilized by the backend server. The Next.js frontend does not require a separate `.env` file for local development.
 
 ```env
-PORT=8080
+PORT=5001
 NODE_ENV=development
 DATABASE_URL="postgresql://cstms_user:cstms_password@localhost:5432/cstms_db"
 REDIS_URL="redis://localhost:6379"
@@ -103,18 +88,50 @@ JWT_EXPIRES_IN="15m"
 JWT_REFRESH_SECRET="your_refresh_secret"
 JWT_REFRESH_EXPIRES_IN="7d"
 ```
+Note: Ensure PORT is set to 5001, as the Next.js frontend proxy (next.config.mjs) routes /api requests to http://127.0.0.1:5001/api/v1/.
+
+### 3. Start the database
+
+Start the PostgreSQL and Redis containers using Docker:
+
+```bash
+docker compose up -d
+```
+
+### 4. Install dependencies (node_modules)
+
+You must install dependencies for both the backend and frontend directories to create the respective node_modules folders.
+
+```bash
+# Install backend dependencies
+npm install
+
+# Install frontend dependencies
+cd web
+npm install
+cd ..
+```
 
 ### 5. Run Prisma setup
 
+Generate the Prisma Client types for TypeScript and initialize the database.
+
 ```bash
-npx prisma generate
-npx prisma migrate dev --name init
+# Push schema state to the database and generate Prisma Client in root
+npx prisma db push
+
+# Generate Prisma Client for the web frontend
+cd web
+npx prisma generate --schema=../prisma/schema.prisma
+cd ..
+
+# Seed the database with initial users and tickets
 npx prisma db seed
 ```
 
 ### 6. Start the applications
 
-Run the backend:
+Run the backend from the project root:
 
 ```bash
 npm run dev
@@ -127,7 +144,7 @@ cd web
 npm run dev
 ```
 
-The backend will run on `http://localhost:8080` and the frontend on `http://localhost:3000`.
+The backend API will run on `http://localhost:5001` and the frontend UI on `http://localhost:3000`.
 
 ## Database Model
 

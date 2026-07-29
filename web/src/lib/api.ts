@@ -151,16 +151,23 @@ export const api = {
       return { ...r, createdAt: new Date(r.createdAt) };
     },
     assign: async (id: string, agentId: string): Promise<TicketDTO> => {
-      const t = await fetchClient<any>(`/tickets/${id}?action=assign`, {
+      const t = await fetchClient<any>(`/tickets/${id}/assign`, {
         method: 'PATCH',
         body: JSON.stringify({ assigneeId: agentId })
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },
     updateStatus: async (id: string, status: TicketStatus): Promise<TicketDTO> => {
-      const t = await fetchClient<any>(`/tickets/${id}?action=status`, {
+      const t = await fetchClient<any>(`/tickets/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
+      });
+      return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
+    },
+    updatePriority: async (id: string, priority: Priority): Promise<TicketDTO> => {
+      const t = await fetchClient<any>(`/tickets/${id}/priority`, {
+        method: 'PATCH',
+        body: JSON.stringify({ priority })
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     }
