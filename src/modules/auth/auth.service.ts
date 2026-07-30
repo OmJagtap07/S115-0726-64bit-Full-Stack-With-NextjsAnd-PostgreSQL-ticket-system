@@ -33,6 +33,27 @@ export class AuthService {
     return { user };
   }
 
+  static async registerCustomer(data: RegisterAdminDto) {
+    const { name, email, password } = data;
+
+    const existingUser = await userRepo.findByEmail(email);
+    if (existingUser) {
+      throw new BadRequestError('User with this email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await userRepo.create({
+      email,
+      name,
+      passwordHash: hashedPassword,
+      role: Role.CUSTOMER,
+      isActive: true,
+    });
+
+    return { user };
+  }
+
   static async login(data: LoginDto) {
     const { email, password } = data;
 
@@ -46,7 +67,7 @@ export class AuthService {
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    return this.generateTokens(user.id);
+    return this.generateTokens(user.id, user.role);
   }
 
   static async refreshToken(data: RefreshTokenDto) {
@@ -72,7 +93,7 @@ export class AuthService {
       throw new UnauthorizedError('User not found or disabled');
     }
 
-    return this.generateTokens(session.userId);
+    return this.generateTokens(session.userId, user.role);
   }
 
   static async logout(data: RefreshTokenDto) {
@@ -83,7 +104,7 @@ export class AuthService {
     }
   }
 
-  private static async generateTokens(userId: string) {
+  private static async generateTokens(userId: string, role: string) {
     const plainRefreshToken = crypto.randomBytes(64).toString('hex');
     const refreshTokenHash = this.hashToken(plainRefreshToken);
     
@@ -97,9 +118,10 @@ export class AuthService {
     });
 
     const accessToken = jwt.sign(
-      { 
+      {
         userId, 
         sessionId: session.id,
+        role,
       }, 
       config.JWT_SECRET, 
       { expiresIn: config.JWT_EXPIRES_IN as any }

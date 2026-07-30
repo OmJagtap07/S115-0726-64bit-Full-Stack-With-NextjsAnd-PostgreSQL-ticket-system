@@ -9,6 +9,7 @@ import { Role } from '@prisma/client';
 export interface JwtPayload {
   userId: string;
   sessionId: string;
+  role?: Role;
 }
 
 // Extend Express Request to include user payload
@@ -42,7 +43,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
     req.user = {
       ...decoded,
-      role: user.role,
+      role: decoded.role || user.role,
     };
     
     httpContext.set('user', req.user);
