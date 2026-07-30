@@ -37,7 +37,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@cstms.com\",\n  \"password\": \"securepassword123\",\n  \"name\": \"System Admin\",\n  \"role\": \"ADMIN\"\n}"
+              "raw": "{\n  \"email\": \"admin@freshworks.com\",\n  \"password\": \"password123\",\n  \"name\": \"System Admin\",\n  \"role\": \"ADMIN\"\n}"
             }
           }
         },
@@ -70,7 +70,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"admin@cstms.com\",\n  \"password\": \"securepassword123\"\n}"
+              "raw": "{\n  \"email\": \"admin@freshworks.com\",\n  \"password\": \"password123\"\n}"
             }
           }
         },

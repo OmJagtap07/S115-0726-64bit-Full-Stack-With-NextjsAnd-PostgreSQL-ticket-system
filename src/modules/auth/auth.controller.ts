@@ -20,6 +20,15 @@ export class AuthController {
     }
   }
 
+  static async register(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await AuthService.registerCustomer(req.body);
+      res.status(201).json({ status: 'success', data: { userId: result.user.id } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { accessToken, refreshToken } = await AuthService.login(req.body);
