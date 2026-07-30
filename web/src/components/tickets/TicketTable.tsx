@@ -1,9 +1,30 @@
 'use client';
 
 import { useState } from 'react';
-import { PriorityBadge, StatusBadge } from './TicketCard';
 import axios from 'axios';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+
+// Lightweight badge helpers (TicketCard no longer exports these)
+function PriorityBadge({ priority }: { priority: string }) {
+  const variant =
+    priority === 'HIGH' || priority === 'URGENT' ? 'priorityHigh' :
+    priority === 'MEDIUM' ? 'priorityMedium' : 'priorityLow';
+  return <Badge variant={variant as any}>{priority.charAt(0) + priority.slice(1).toLowerCase()}</Badge>;
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const variant =
+    status === 'OPEN' ? 'statusOpen' :
+    status === 'IN_PROGRESS' ? 'statusProgress' :
+    status === 'RESOLVED' ? 'statusOnHold' : 'statusClosed';
+  const label =
+    status === 'OPEN' ? 'Open' :
+    status === 'IN_PROGRESS' ? 'In Progress' :
+    status === 'RESOLVED' ? 'Resolved' : 'Closed';
+  return <Badge variant={variant as any}>{label}</Badge>;
+}
+
 
 interface TicketTableProps {
   tickets: any[];

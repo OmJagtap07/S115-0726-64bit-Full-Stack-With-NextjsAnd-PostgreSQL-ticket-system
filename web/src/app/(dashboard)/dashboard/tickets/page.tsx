@@ -5,8 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Plus, Search, Filter, TicketIcon, Clock, CheckCircle2, Activity } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-import { api, UserDTO } from '@/lib/api';
-import { TicketStatus, Priority } from '@prisma/client';
+import { api, UserDTO, TicketStatus, Priority } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -236,7 +235,7 @@ export default function TicketsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={agentFilter} onValueChange={setAgentFilter}>
+            <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v ?? 'ALL')}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Agent" />
               </SelectTrigger>
