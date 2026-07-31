@@ -41,16 +41,17 @@ export class ApiError extends Error {
 }
 
 // Fetch Wrapper
-async function fetchClient<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+async function fetchClient<T>(endpoint: string, options: RequestInit & { returnFullResponse?: boolean } = {}): Promise<T> {
+  const { returnFullResponse, ...fetchOptions } = options;
   const defaultHeaders: Record<string, string> = {
     'Content-Type': 'application/json',
   };
 
   const config: RequestInit = {
-    ...options,
+    ...fetchOptions,
     headers: {
       ...defaultHeaders,
-      ...options.headers,
+      ...fetchOptions.headers,
     },
   };
 
@@ -71,6 +72,10 @@ async function fetchClient<T>(endpoint: string, options: RequestInit = {}): Prom
 
   if (!response.ok) {
     throw new ApiError(response.status, data.message || 'API request failed');
+  }
+
+  if (returnFullResponse) {
+    return data as T;
   }
 
   // Next.js API routes often wrap data in { status: 'success', data: ... }
@@ -124,15 +129,22 @@ export const api = {
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },
-    list: async (params?: { status?: TicketStatus, search?: string }): Promise<TicketDTO[]> => {
+    list: async (params?: { status?: TicketStatus, search?: string, priority?: Priority, assigneeId?: string, page?: number, limit?: number }): Promise<{ data: TicketDTO[], meta: { total: number, page: number, limit: number } }> => {
       const query = new URLSearchParams();
       if (params?.status) query.append('status', params.status);
       if (params?.search) query.append('search', params.search);
+      if (params?.priority) query.append('priority', params.priority);
+      if (params?.assigneeId) query.append('assigneeId', params.assigneeId);
+      if (params?.page) query.append('page', params.page.toString());
+      if (params?.limit) query.append('limit', params.limit.toString());
       const qs = query.toString();
       
-      const tickets = await fetchClient<any[]>(`/tickets${qs ? `?${qs}` : ''}`);
+      const response = await fetchClient<{ data: any[], meta: any }>(`/tickets${qs ? `?${qs}` : ''}`, { returnFullResponse: true });
       // Parse dates coming back from JSON payload
-      return tickets.map(t => ({ ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) }));
+      return {
+        data: response.data.map(t => ({ ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) })),
+        meta: response.meta
+      };
     },
     get: async (id: string): Promise<TicketDTO> => {
       const t = await fetchClient<any>(`/tickets/${id}`);
