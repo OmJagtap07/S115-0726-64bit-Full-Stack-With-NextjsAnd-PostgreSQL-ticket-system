@@ -20,6 +20,7 @@ router.patch('/:id/assign', requireRole(['ADMIN']), validateRequest(assignTicket
 router.patch('/:id/priority', requireRole(['ADMIN', 'AGENT']), validateRequest(updatePrioritySchema), TicketsController.updatePriority);
 
 // Replies
+router.get('/:id/replies', TicketsController.getReplies);
 router.post('/:id/replies', validateRequest(replyTicketSchema), TicketsController.replyToTicket);
 
 export default router;

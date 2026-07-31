@@ -90,6 +90,15 @@ export class TicketsController {
     }
   }
 
+  static async getReplies(req: Request, res: Response, next: NextFunction) {
+    try {
+      const replies = await TicketsService.getReplies(req.params.id);
+      res.status(200).json({ status: 'success', data: replies });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async replyToTicket(req: Request, res: Response, next: NextFunction) {
     try {
       // Basic check: Customers cannot make internal notes
