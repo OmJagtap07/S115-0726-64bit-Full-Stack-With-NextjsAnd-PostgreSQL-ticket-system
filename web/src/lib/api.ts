@@ -129,7 +129,7 @@ export const api = {
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },
-    list: async (params?: { status?: TicketStatus, search?: string, priority?: Priority, assigneeId?: string, page?: number, limit?: number }): Promise<{ data: TicketDTO[], meta: { total: number, page: number, limit: number } }> => {
+    list: async (params?: { status?: TicketStatus, search?: string, priority?: Priority, assigneeId?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: string }): Promise<{ data: TicketDTO[], meta: { total: number, page: number, limit: number, totalPages: number } }> => {
       const query = new URLSearchParams();
       if (params?.status) query.append('status', params.status);
       if (params?.search) query.append('search', params.search);
@@ -137,6 +137,8 @@ export const api = {
       if (params?.assigneeId) query.append('assigneeId', params.assigneeId);
       if (params?.page) query.append('page', params.page.toString());
       if (params?.limit) query.append('limit', params.limit.toString());
+      if (params?.sortBy) query.append('sortBy', params.sortBy);
+      if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
       const qs = query.toString();
       
       const response = await fetchClient<{ data: any[], meta: any }>(`/tickets${qs ? `?${qs}` : ''}`, { returnFullResponse: true });
@@ -163,14 +165,14 @@ export const api = {
       return { ...r, createdAt: new Date(r.createdAt) };
     },
     assign: async (id: string, agentId: string): Promise<TicketDTO> => {
-      const t = await fetchClient<any>(`/tickets/${id}?action=assign`, {
+      const t = await fetchClient<any>(`/tickets/${id}/assign`, {
         method: 'PATCH',
         body: JSON.stringify({ assigneeId: agentId })
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },
     updateStatus: async (id: string, status: TicketStatus): Promise<TicketDTO> => {
-      const t = await fetchClient<any>(`/tickets/${id}?action=status`, {
+      const t = await fetchClient<any>(`/tickets/${id}/status`, {
         method: 'PATCH',
         body: JSON.stringify({ status })
       });

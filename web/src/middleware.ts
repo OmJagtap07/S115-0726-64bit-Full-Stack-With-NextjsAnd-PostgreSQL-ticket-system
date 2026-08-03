@@ -34,7 +34,10 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_secret');
+    if (!process.env.JWT_SECRET) {
+      throw new Error('FATAL: JWT_SECRET environment variable is not defined.');
+    }
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const { payload } = await jwtVerify(accessToken, secret);
 
     // Basic RBAC checking based on URL paths

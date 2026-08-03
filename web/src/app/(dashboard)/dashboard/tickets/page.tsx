@@ -44,7 +44,9 @@ export default function TicketsPage() {
         priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
         assigneeId: agentFilter === 'ALL' ? undefined : (agentFilter === 'UNASSIGNED' ? 'null' : agentFilter),
         page: currentPage,
-        limit: itemsPerPage
+        limit: itemsPerPage,
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
       });
 
       return response;
@@ -52,19 +54,8 @@ export default function TicketsPage() {
     enabled: !!currentUser // only fetch tickets once we know the role
   });
 
-  // Query to get all tickets for summary counts
-  const { data: summaryTickets } = useQuery({
-    queryKey: ['summaryTickets', currentUser?.role],
-    queryFn: async () => {
-      const response = await api.tickets.list();
-      return response.data;
-    },
-    enabled: !!currentUser && currentUser.role === 'CUSTOMER'
-  });
 
-  // Derived state for Pagination
-  const totalItems = ticketsResponse?.meta?.total || 0;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = ticketsResponse?.meta?.totalPages || 0;
   const paginatedTickets = ticketsResponse?.data || [];
 
   useEffect(() => {
@@ -96,53 +87,6 @@ export default function TicketsPage() {
         </Button>
       </div>
 
-      {/* Customer Summary Cards */}
-      {currentUser.role === 'CUSTOMER' && summaryTickets && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-card border border-border p-4 rounded-xl flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <TicketIcon className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Total</p>
-              <h3 className="text-2xl font-bold text-foreground">{summaryTickets.length}</h3>
-            </div>
-          </div>
-          <div className="bg-card border border-border p-4 rounded-xl flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-              <Activity className="w-5 h-5 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Open</p>
-              <h3 className="text-2xl font-bold text-foreground">
-                {summaryTickets.filter(t => t.status === 'OPEN').length}
-              </h3>
-            </div>
-          </div>
-          <div className="bg-card border border-border p-4 rounded-xl flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">In Progress</p>
-              <h3 className="text-2xl font-bold text-foreground">
-                {summaryTickets.filter(t => t.status === 'IN_PROGRESS').length}
-              </h3>
-            </div>
-          </div>
-          <div className="bg-card border border-border p-4 rounded-xl flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">Resolved</p>
-              <h3 className="text-2xl font-bold text-foreground">
-                {summaryTickets.filter(t => t.status === 'RESOLVED' || t.status === 'CLOSED').length}
-              </h3>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Filters and Tabs */}
       <div className="flex flex-col space-y-4 border-b border-border pb-4">
