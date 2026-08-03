@@ -69,7 +69,6 @@ export default function TicketsPage() {
   return (
     <div className="space-y-6">
       
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
@@ -81,10 +80,12 @@ export default function TicketsPage() {
               : "Here are the tickets assigned to you."}
           </p>
         </div>
-        <Button className="shrink-0 gap-1.5" onClick={() => router.push('/dashboard/tickets/new')}>
-          <Plus className="w-4 h-4" />
-          New Ticket
-        </Button>
+        {!isAdmin && (
+          <Button className="shrink-0 gap-1.5" onClick={() => router.push('/dashboard/tickets/new')}>
+            <Plus className="w-4 h-4" />
+            New Ticket
+          </Button>
+        )}
       </div>
 
 

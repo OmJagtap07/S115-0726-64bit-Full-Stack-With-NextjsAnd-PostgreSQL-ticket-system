@@ -128,12 +128,12 @@ export function TicketCard({ ticket, agents, isAdmin }: TicketCardProps) {
           {isAdmin && (
             <div className="flex items-center gap-2">
               {isAssigningMode ? (
-                <div className="flex items-center gap-2 animate-in fade-in">
+                <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
                   <Select value={selectedAgent || ''} onValueChange={setSelectedAgent}>
-                    <SelectTrigger className="w-[130px] h-8 text-xs bg-muted/50">
+                    <SelectTrigger className="w-[140px] h-8 text-xs bg-muted/50 focus:ring-1 transition-all">
                       <SelectValue placeholder="Select Agent" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="animate-in fade-in zoom-in-95">
                       {agents?.map(a => (
                         <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
                       ))}
@@ -141,13 +141,13 @@ export function TicketCard({ ticket, agents, isAdmin }: TicketCardProps) {
                   </Select>
                   <Button 
                     size="sm" 
-                    className="h-8 text-xs px-3" 
+                    className="h-8 text-xs px-3 shadow-sm transition-all" 
                     disabled={!selectedAgent || assignMutation.isPending}
                     onClick={handleConfirmAssign}
                   >
                     {assignMutation.isPending ? "Assigning..." : "Confirm"}
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 px-2 text-xs" onClick={() => { setIsAssigningMode(false); setSelectedAgent(null); }}>
+                  <Button size="sm" variant="ghost" className="h-8 px-2 text-xs hover:bg-muted" onClick={() => { setIsAssigningMode(false); setSelectedAgent(null); }}>
                     Cancel
                   </Button>
                 </div>

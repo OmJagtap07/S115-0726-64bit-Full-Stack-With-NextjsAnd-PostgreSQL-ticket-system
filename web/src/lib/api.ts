@@ -177,6 +177,13 @@ export const api = {
         body: JSON.stringify({ status })
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
+    },
+    updatePriority: async (id: string, priority: Priority): Promise<TicketDTO> => {
+      const t = await fetchClient<any>(`/tickets/${id}/priority`, {
+        method: 'PATCH',
+        body: JSON.stringify({ priority })
+      });
+      return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     }
   },
   agents: {
