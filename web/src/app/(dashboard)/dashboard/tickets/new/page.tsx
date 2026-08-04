@@ -8,7 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ArrowLeft, UploadCloud } from 'lucide-react';
 import Link from 'next/link';
-import { Priority } from '@prisma/client';
+import { Priority } from '@/lib/api';
 
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';

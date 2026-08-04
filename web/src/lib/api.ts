@@ -1,4 +1,7 @@
-import { TicketStatus, Priority, Role } from '@prisma/client';
+// Prisma v7 no longer exports enums from @prisma/client — defined locally
+export type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export type Role = 'ADMIN' | 'AGENT' | 'CUSTOMER';
 
 export interface UserDTO {
   id: string;
