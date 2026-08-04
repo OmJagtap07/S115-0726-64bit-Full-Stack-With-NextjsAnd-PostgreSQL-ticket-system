@@ -22,14 +22,17 @@ export class TicketsController {
       // Filtering logic: Agents see all (or assigned), Customers see their own
       const filters: any = { deletedAt: null };
       
-      // DAY 5: Current user middleware and filters implemented here
       if (req.user!.role === Role.CUSTOMER) {
         filters.customerId = req.user!.userId;
+      } else if (req.user!.role === Role.AGENT) {
+        filters.assigneeId = req.user!.userId;
       }
 
       if (req.query.status) filters.status = req.query.status;
       if (req.query.priority) filters.priority = req.query.priority;
-      if (req.query.assigneeId) filters.assigneeId = req.query.assigneeId;
+      if (req.query.assigneeId) {
+        filters.assigneeId = req.query.assigneeId === 'null' ? null : req.query.assigneeId;
+      }
 
       // Simple Search by subject or ticket number
       if (req.query.search) {
@@ -52,12 +55,7 @@ export class TicketsController {
 
   static async getTicketById(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.getTicketById(req.params.id);
-      
-      // Basic authorization
-      if (req.user!.role === Role.CUSTOMER && ticket.customerId !== req.user!.userId) {
-        return res.status(403).json({ status: 'error', message: 'Forbidden' });
-      }
+      const ticket = await TicketsService.getTicketById(req.params.id, req.user! as any);
 
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
@@ -67,7 +65,7 @@ export class TicketsController {
 
   static async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.updateStatus(req.params.id, req.user!.userId, req.body);
+      const ticket = await TicketsService.updateStatus(req.params.id, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -76,7 +74,7 @@ export class TicketsController {
 
   static async assignTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.assignTicket(req.params.id, req.user!.userId, req.body);
+      const ticket = await TicketsService.assignTicket(req.params.id, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -85,7 +83,7 @@ export class TicketsController {
 
   static async updatePriority(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.updatePriority(req.params.id, req.user!.userId, req.body);
+      const ticket = await TicketsService.updatePriority(req.params.id, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -108,7 +106,7 @@ export class TicketsController {
          return res.status(403).json({ status: 'error', message: 'Customers cannot create internal notes' });
       }
 
-      const reply = await TicketsService.replyToTicket(req.params.id, req.user!.userId, req.body);
+      const reply = await TicketsService.replyToTicket(req.params.id, req.user! as any, req.body);
       
       setImmediate(() => {
         try {
@@ -127,7 +125,7 @@ export class TicketsController {
 
   static async deleteTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      await TicketsService.softDeleteTicket(req.params.id);
+      await TicketsService.softDeleteTicket(req.params.id, req.user! as any);
       res.status(204).send();
     } catch (error) {
       next(error);

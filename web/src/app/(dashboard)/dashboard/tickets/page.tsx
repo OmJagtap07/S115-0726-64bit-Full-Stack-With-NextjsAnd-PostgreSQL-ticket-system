@@ -35,34 +35,19 @@ export default function TicketsPage() {
     queryFn: () => api.agents.list()
   });
 
-  const { data: tickets, isLoading, isError, refetch } = useQuery({
-    queryKey: ['tickets', activeTab, searchQuery, priorityFilter, agentFilter, currentUser?.role],
+  const { data: ticketsResponse, isLoading, isError, refetch } = useQuery({
+    queryKey: ['tickets', activeTab, searchQuery, priorityFilter, agentFilter, currentPage, currentUser?.role],
     queryFn: async () => {
-      let data = await api.tickets.list({ 
+      let response = await api.tickets.list({ 
         status: activeTab === 'ALL' ? undefined : activeTab,
-        search: searchQuery 
+        search: searchQuery,
+        priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
+        assigneeId: agentFilter === 'ALL' ? undefined : (agentFilter === 'UNASSIGNED' ? 'null' : agentFilter),
+        page: currentPage,
+        limit: itemsPerPage
       });
 
-      // Role-aware filtering
-      if (currentUser?.role === 'AGENT') {
-        data = data.filter(t => t.assigneeId === currentUser.id);
-      } else if (currentUser?.role === 'CUSTOMER') {
-        data = data.filter(t => t.customerId === currentUser.id);
-      }
-
-      // Advanced filters
-      if (priorityFilter !== 'ALL') {
-        data = data.filter(t => t.priority === priorityFilter);
-      }
-      if (agentFilter !== 'ALL') {
-        if (agentFilter === 'UNASSIGNED') {
-          data = data.filter(t => !t.assigneeId);
-        } else {
-          data = data.filter(t => t.assigneeId === agentFilter);
-        }
-      }
-
-      return data;
+      return response;
     },
     enabled: !!currentUser // only fetch tickets once we know the role
   });
@@ -71,26 +56,16 @@ export default function TicketsPage() {
   const { data: summaryTickets } = useQuery({
     queryKey: ['summaryTickets', currentUser?.role],
     queryFn: async () => {
-      let data = await api.tickets.list();
-      if (currentUser?.role === 'AGENT') {
-        data = data.filter(t => t.assigneeId === currentUser.id);
-      } else if (currentUser?.role === 'CUSTOMER') {
-        data = data.filter(t => t.customerId === currentUser.id);
-      }
-      return data;
+      const response = await api.tickets.list();
+      return response.data;
     },
     enabled: !!currentUser && currentUser.role === 'CUSTOMER'
   });
 
   // Derived state for Pagination
-  const totalItems = tickets?.length || 0;
+  const totalItems = ticketsResponse?.meta?.total || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  
-  const paginatedTickets = React.useMemo(() => {
-    if (!tickets) return [];
-    const start = (currentPage - 1) * itemsPerPage;
-    return tickets.slice(start, start + itemsPerPage);
-  }, [tickets, currentPage]);
+  const paginatedTickets = ticketsResponse?.data || [];
 
   useEffect(() => {
     setCurrentPage(1);
