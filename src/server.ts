@@ -23,3 +23,5 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
+// Trigger tsx watch restart 
+// Trigger tsx watch restart 2 

@@ -1,5 +1,11 @@
 # Freshworks Ticket Management System
 
+![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+
 An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks by **Team 115**. Powered by Next.js App Router, PostgreSQL, and Prisma.
 
 > **Team:** Om Jagtap (Backend) · Shruti Itkalkar (Frontend) · Aayushman Shukla (Middleware & Testing)
@@ -21,6 +27,15 @@ An enterprise-grade, full-stack Customer Support Ticket Management System built 
 | **Protected Routes** | Next.js middleware guards all private routes with JWT verification |
 | **Unauthorized Page** | Custom access-denied page for role-based route violations |
 
+- Role-based access for Admin, Agent, and Customer users
+- Ticket lifecycle management with statuses such as Open, In Progress, Resolved, and Closed
+- Priority-based ticket handling
+- Conversation history through ticket replies
+- Activity tracking for ticket changes and assignment history
+- Secure authentication and session management using JWT
+- Rate limiting, logging, and structured error handling
+- Clean UI for managing tickets and support workflows
+
 ---
 
 ## Tech Stack
@@ -28,17 +43,37 @@ An enterprise-grade, full-stack Customer Support Ticket Management System built 
 - **Frontend:** Next.js 16 (App Router), React, TypeScript
 - **Styling:** Tailwind CSS, Lucide Icons, Framer Motion
 - **State Management:** TanStack React Query (optimistic updates)
-- **Backend:** Next.js Route Handlers (BFF pattern)
-- **Database:** PostgreSQL via Neon (serverless)
+- **Backend:** Node.js + Express, Next.js Route Handlers (BFF pattern)
+- **Database:** PostgreSQL via Neon (serverless) / Docker
 - **ORM:** Prisma
 - **Auth:** JWT (`jose`) with secure HTTP-only cookies
 - **Validation:** Zod, React Hook Form
+- **Developer Tools:** Docker Compose, Prisma Studio, Vitest
+
+---
+
+## 📖 Documentation Directory
+
+We have comprehensive guides available for all aspects of the system.
 
 ---
 
 ## Architecture
 
 This project follows a strict **Backend-for-Frontend (BFF)** pattern:
+
+```text
+.
+├── prisma/                  # Prisma schema, migrations, and seed data
+├── src/                     # Backend application source
+│   ├── modules/             # Auth, user, and ticket modules
+│   ├── core/                # Shared infrastructure and middleware
+│   └── server.ts            # Application entry point
+├── web/                     # Next.js frontend application
+├── docker-compose.yml       # PostgreSQL container configuration
+├── package.json             # Backend scripts and dependencies
+└── readme.md                # Project documentation
+```
 
 ```
 web/
@@ -66,46 +101,89 @@ web/
 
 ---
 
-## Local Development Setup
+## Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) v18+
-- PostgreSQL (local or via [Neon](https://neon.tech))
 
-### 1. Clone & Install
+- Node.js 20+
+- npm
+- Docker Desktop
+
+### 1. Clone the repository
 
 ```bash
-git clone <repo-url>
-cd web
-npm install
+git clone <repository-url>
+cd S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system
 ```
 
-### 2. Environment Variables
+### 2. Configure environment variables
 
-Create a `.env` file in the `web/` directory:
+Create a `.env` file in the project root. This configuration will be utilized by the backend server. The Next.js frontend does not require a separate `.env` file for local development.
 
 ```env
-DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
-JWT_SECRET="your-super-secret-jwt-key"
+PORT=5001
+NODE_ENV=development
+DATABASE_URL="postgresql://cstms_user:cstms_password@localhost:5432/cstms_db"
+REDIS_URL="redis://localhost:6379"
+JWT_SECRET="your_jwt_secret"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_SECRET="your_refresh_secret"
+JWT_REFRESH_EXPIRES_IN="7d"
 ```
 
-### 3. Database Setup
+> Note: Ensure PORT is set to 5001, as the Next.js frontend proxy (next.config.mjs) routes /api requests to http://127.0.0.1:5001/api/v1/.
+
+### 3. Start the database
+
+Start the PostgreSQL and Redis containers using Docker:
 
 ```bash
+docker compose up -d
+```
+
+### 4. Install dependencies (node_modules)
+
+You must install dependencies for both the backend and frontend directories to create the respective node_modules folders.
+
+```bash
+# Install backend dependencies
+npm install
+
+# Install frontend dependencies
+cd web
+npm install
+cd ..
+```
+
+### 5. Database Setup
+
+Generate the Prisma Client types for TypeScript and initialize the database.
+
+```bash
+# Push schema state to the database and generate Prisma Client in root
 npx prisma db push
-npx prisma generate
-```
 
-Optionally seed test data:
+# Generate Prisma Client for the web frontend
+cd web
+npx prisma generate --schema=../prisma/schema.prisma
+cd ..
 
-```bash
+# Seed the database with initial users and tickets
 npx prisma db seed
 ```
 
-### 4. Start Development Server
+### 6. Start the applications
+
+Run the backend from the project root:
 
 ```bash
 npm run dev
+```
+
+In a separate terminal, start the frontend:
+
+```bash
+cd web && npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -150,7 +228,15 @@ The easiest way to test all three roles:
 
 ---
 
-## Git Workflow
+## Contributing
+
+1. Fork the repository and create a feature branch.
+2. Use descriptive branch names such as `feature/your-feature` or `fix/bug-name`.
+3. Keep changes focused and document significant updates.
+4. Test your changes locally before opening a pull request.
+5. Submit a pull request with a clear summary of the change.
+
+### Branch Naming
 
 | Branch prefix | Purpose |
 |---|---|
@@ -171,14 +257,18 @@ git push origin feature/your-feature-name
 
 ---
 
-## Scripts
+## Available Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start development server at `localhost:3000` |
-| `npm run build` | Create an optimized production build |
-| `npm run start` | Start the production server |
-| `npm run lint` | Run ESLint checks |
+### Backend
+- `npm run dev` — start the backend in development mode
+- `npm run build` — build the server for production
+- `npm run start` — start the compiled server
+- `npm test` — run backend tests
+
+### Frontend
+- `cd web && npm run dev` — start the Next.js app
+- `cd web && npm run build` — create a production build
+- `cd web && npm run lint` — run ESLint checks
 
 ---
 
@@ -189,3 +279,7 @@ git push origin feature/your-feature-name
 | **Om Jagtap** | Backend Development — API routes, services, database models |
 | **Shruti Itkalkar** | Frontend Development — UI components, pages, design system |
 | **Aayushman Shukla** | Middleware, Auth, Testing & Deployment |
+
+## License
+
+This project is licensed under the ISC License.

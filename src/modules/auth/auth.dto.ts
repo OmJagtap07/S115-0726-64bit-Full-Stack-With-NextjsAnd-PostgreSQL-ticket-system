@@ -26,6 +26,22 @@ export const refreshTokenSchema = z.object({
   }),
 });
 
+export const registerSchema = z.object({
+  body: z.object({
+    name: z.string().min(2),
+    email: z.string().email(),
+    password: z.string()
+      .min(8)
+      .regex(/[A-Z]/, 'Must contain uppercase')
+      .regex(/[a-z]/, 'Must contain lowercase')
+      .regex(/[0-9]/, 'Must contain number')
+      .regex(/[\W_]/, 'Must contain special character'),
+    role: z.enum(['ADMIN', 'AGENT', 'CUSTOMER']).optional(),
+  }),
+});
+
 export type RegisterAdminDto = z.infer<typeof registerAdminSchema>['body'];
+export type RegisterDto = z.infer<typeof registerSchema>['body'];
 export type LoginDto = z.infer<typeof loginSchema>['body'];
 export type RefreshTokenDto = z.infer<typeof refreshTokenSchema>['body'];
+

@@ -11,7 +11,6 @@ import { Eye, EyeOff, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { api } from '@/lib/api';
 
 const registerSchema = z.object({
@@ -23,7 +22,10 @@ const registerSchema = z.object({
     .regex(/[a-z]/, 'Must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Must contain at least one number')
     .regex(/[\W_]/, 'Must contain at least one special character'),
-  role: z.enum(['customer', 'agent', 'admin'], "Please select a role."),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -42,16 +44,13 @@ export default function RegisterPage() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: 'agent',
-    }
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     setErrorMsg("");
     try {
-      await api.auth.register({ name: data.fullName, email: data.email, password: data.password, role: data.role.toUpperCase() });
+      await api.auth.register({ name: data.fullName, email: data.email, password: data.password });
       alert("Registration successful! Please log in.");
       router.push('/login');
     } catch (error: any) {
@@ -147,22 +146,17 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Role</label>
-                <Select 
-                  onValueChange={(val) => setValue("role", val as any)}
-                  defaultValue={watch("role")}
-                >
-                  <SelectTrigger className={errors.role ? "border-destructive focus-visible:ring-destructive/50" : ""}>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="customer">Customer</SelectItem>
-                    <SelectItem value="agent">Agent</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.role && (
-                  <p className="text-xs text-destructive">{errors.role.message}</p>
+                <label className="text-sm font-medium text-foreground">Confirm Password</label>
+                <div className="relative">
+                  <Input 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm your password" 
+                    {...register("confirmPassword")}
+                    className={errors.confirmPassword ? "border-destructive focus-visible:ring-destructive/50 pr-10" : "pr-10"}
+                  />
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
                 )}
               </div>
 

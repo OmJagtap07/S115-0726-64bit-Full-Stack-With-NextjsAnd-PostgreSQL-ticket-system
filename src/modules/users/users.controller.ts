@@ -29,6 +29,24 @@ export class UsersController {
     }
   }
 
+  static async getMe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await UsersService.getUserById(req.user!.userId);
+      res.status(200).json({ status: 'success', data: user });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async getAgents(req: Request, res: Response, next: NextFunction) {
+    try {
+      const agents = await UsersService.getUsers({ role: 'AGENT' });
+      res.status(200).json({ status: 'success', data: agents });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
       const user = await UsersService.updateUser(req.params.id, req.body);

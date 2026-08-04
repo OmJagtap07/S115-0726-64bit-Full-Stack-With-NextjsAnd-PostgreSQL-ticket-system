@@ -1,0 +1,319 @@
+{
+  "info": {
+    "name": "CSTMS Full API",
+    "description": "Complete API Collection for the Customer Support Ticket Management System (CSTMS)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register-admin"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@freshworks.com\",\n  \"password\": \"password123\",\n  \"name\": \"System Admin\",\n  \"role\": \"ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set(\"accessToken\", jsonData.data.accessToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@freshworks.com\",\n  \"password\": \"password123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh-token"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"<insert-refresh-token>\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Login issue on mobile\",\n  \"description\": \"I cannot log into my account when using Safari on iOS.\",\n  \"priority\": \"HIGH\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<ticket-id-here>"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/:id/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<ticket-id-here>"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Assign Ticket",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/:id/assign",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets", ":id", "assign"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<ticket-id-here>"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigneeId\": \"<agent-id-here>\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Add Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/:id/replies",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets", ":id", "replies"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<ticket-id-here>"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"We are looking into this right now.\",\n  \"isInternal\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Replies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/tickets/:id/replies",
+              "host": ["{{baseUrl}}"],
+              "path": ["tickets", ":id", "replies"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "<ticket-id-here>"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

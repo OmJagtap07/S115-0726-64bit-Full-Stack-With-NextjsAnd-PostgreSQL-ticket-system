@@ -56,6 +56,7 @@ export async function middleware(request: NextRequest) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-id', payload.userId as string);
     requestHeaders.set('x-user-role', payload.role as string);
+    requestHeaders.set('Authorization', `Bearer ${accessToken}`);
     
     return NextResponse.next({
       request: {
