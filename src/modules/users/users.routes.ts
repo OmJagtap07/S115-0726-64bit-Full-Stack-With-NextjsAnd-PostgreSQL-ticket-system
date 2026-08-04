@@ -9,7 +9,7 @@ const router = Router();
 // All user routes require authentication
 router.use(requireAuth);
 
-// Self & Agent information (Any authenticated user)
+// User Profiles & Agents (Accessible to all authenticated users)
 router.get('/me', UsersController.getMe);
 router.get('/agents', UsersController.getAgents);
 

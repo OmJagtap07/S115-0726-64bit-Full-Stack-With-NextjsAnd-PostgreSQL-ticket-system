@@ -43,10 +43,11 @@ export class TicketsController {
       }
 
       const tickets = await TicketsService.getTickets(filters, skip, limit);
+      const totalPages = Math.ceil(tickets.total / limit);
       res.status(200).json({ 
         status: 'success', 
         data: tickets.data,
-        meta: { total: tickets.total, page, limit }
+        meta: { total: tickets.total, page, limit, totalPages }
       });
     } catch (error) {
       next(error);
@@ -92,7 +93,7 @@ export class TicketsController {
 
   static async getReplies(req: Request, res: Response, next: NextFunction) {
     try {
-      const replies = await TicketsService.getReplies(req.params.id);
+      const replies = await TicketsService.getReplies(req.params.id, req.user! as any);
       res.status(200).json({ status: 'success', data: replies });
     } catch (error) {
       next(error);

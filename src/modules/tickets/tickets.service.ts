@@ -8,8 +8,6 @@ const ticketRepo = new PrismaTicketRepository();
 const replyRepo = new PrismaTicketReplyRepository();
 const activityRepo = new PrismaTicketActivityRepository();
 
-const activityRepo = new PrismaTicketActivityRepository();
-
 interface AuthUser {
   userId: string;
   role: string;
@@ -111,6 +109,18 @@ export class TicketsService {
     });
 
     return updated;
+  }
+
+  static async getReplies(ticketId: string, user: AuthUser) {
+    const ticket = await ticketRepo.findById(ticketId);
+    if (!ticket) throw new NotFoundError('Ticket not found');
+    this.authorizeTicketAccess(user, ticket);
+
+    const replies = await replyRepo.findAllByTicket(ticketId);
+    if (user.role === Role.CUSTOMER) {
+      return replies.filter(r => !r.isInternal);
+    }
+    return replies;
   }
 
   static async replyToTicket(ticketId: string, user: AuthUser, data: ReplyTicketDto) {
