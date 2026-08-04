@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Plus, Search, Filter, TicketIcon, Clock, CheckCircle2, Activity } from 'lucide-react';
+import { Plus, Search, Filter, TicketIcon, Clock, CheckCircle2, Activity, AlertCircle, UserCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { api, UserDTO } from '@/lib/api';
@@ -14,6 +14,21 @@ import { TicketCard } from '@/components/tickets/TicketCard';
 import { Pagination } from '@/components/ui/pagination';
 import { LoadingState, EmptyState, ErrorState } from '@/components/ui/states';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+function SummaryCard({ title, count, icon }: { title: string, count: number, icon: React.ReactNode }) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{count ?? 0}</div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export default function TicketsPage() {
   const router = useRouter();
@@ -33,6 +48,12 @@ export default function TicketsPage() {
   const { data: agents } = useQuery({
     queryKey: ['agents'],
     queryFn: () => api.agents.list()
+  });
+
+  const { data: summary } = useQuery({
+    queryKey: ['tickets-summary', currentUser?.role],
+    queryFn: () => api.tickets.getSummary(),
+    enabled: !!currentUser
   });
 
   const { data: ticketsResponse, isLoading, isError, refetch } = useQuery({
@@ -89,6 +110,31 @@ export default function TicketsPage() {
       </div>
 
 
+      {/* Summary Cards */}
+      {summary && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {isAdmin ? (
+            <>
+              <SummaryCard title="Total Open Tickets" count={summary.totalOpen} icon={<TicketIcon className="w-5 h-5 text-primary" />} />
+              <SummaryCard title="Unassigned Tickets" count={summary.unassigned} icon={<AlertCircle className="w-5 h-5 text-destructive" />} />
+              <SummaryCard title="Assigned Tickets" count={summary.assigned} icon={<UserCheck className="w-5 h-5 text-primary" />} />
+            </>
+          ) : currentUser?.role === 'AGENT' ? (
+            <>
+              <SummaryCard title="My Open Tickets" count={summary.myOpen} icon={<TicketIcon className="w-5 h-5 text-primary" />} />
+              <SummaryCard title="In Progress" count={summary.inProgress} icon={<Activity className="w-5 h-5 text-primary" />} />
+              <SummaryCard title="Resolved Today" count={summary.resolvedToday} icon={<CheckCircle2 className="w-5 h-5 text-primary" />} />
+            </>
+          ) : (
+            <>
+              <SummaryCard title="My Tickets" count={summary.myTickets} icon={<TicketIcon className="w-5 h-5 text-primary" />} />
+              <SummaryCard title="Open Requests" count={summary.openRequests} icon={<Activity className="w-5 h-5 text-primary" />} />
+              <SummaryCard title="Recently Resolved" count={summary.recentlyResolved} icon={<CheckCircle2 className="w-5 h-5 text-primary" />} />
+            </>
+          )}
+        </div>
+      )}
+
       {/* Filters and Tabs */}
       <div className="flex flex-col space-y-4 border-b border-border pb-4">
         <div className="flex flex-col lg:flex-row justify-between gap-4">
@@ -116,7 +162,7 @@ export default function TicketsPage() {
                 value="RESOLVED" 
                 className="rounded-full px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-muted/50 text-foreground"
               >
-                On Hold
+                Resolved
               </TabsTrigger>
               <TabsTrigger 
                 value="CLOSED" 
@@ -139,23 +185,23 @@ export default function TicketsPage() {
           </div>
         </div>
 
-        {isAdmin && (
-          <div className="flex items-center gap-3">
-            <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">Filters:</span>
-            
-            <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as any)}>
-              <SelectTrigger className="w-[140px] h-8 text-xs">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">All Priorities</SelectItem>
-                <SelectItem value="HIGH">High</SelectItem>
-                <SelectItem value="MEDIUM">Medium</SelectItem>
-                <SelectItem value="LOW">Low</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="flex items-center gap-3 mt-4 lg:mt-0">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+          
+          <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as any)}>
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue placeholder="Priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Priorities</SelectItem>
+              <SelectItem value="HIGH">High</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="LOW">Low</SelectItem>
+            </SelectContent>
+          </Select>
 
+          {isAdmin && (
             <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v || 'ALL')}>
               <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="Agent" />
@@ -168,8 +214,8 @@ export default function TicketsPage() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Ticket List Area */}

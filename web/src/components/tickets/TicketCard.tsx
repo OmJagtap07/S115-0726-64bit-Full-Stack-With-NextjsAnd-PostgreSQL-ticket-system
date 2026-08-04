@@ -64,7 +64,7 @@ export function TicketCard({ ticket, agents, isAdmin }: TicketCardProps) {
   const statusLabel = 
     ticket.status === 'OPEN' ? 'Open' :
     ticket.status === 'IN_PROGRESS' ? 'In Progress' :
-    ticket.status === 'RESOLVED' ? 'On Hold' : 'Closed';
+    ticket.status === 'RESOLVED' ? 'Resolved' : 'Closed';
     
   const priorityLabel = ticket.priority.charAt(0) + ticket.priority.slice(1).toLowerCase();
 
@@ -153,9 +153,9 @@ export function TicketCard({ ticket, agents, isAdmin }: TicketCardProps) {
                 </div>
               ) : (
                 <Button 
-                  variant="outline" 
+                  variant={ticket.assigneeId ? "outline" : "default"} 
                   size="sm" 
-                  className="h-8 text-xs gap-1.5" 
+                  className="h-8 text-xs gap-1.5 shadow-sm" 
                   onClick={() => setIsAssigningMode(true)}
                 >
                   <UserPlus className="w-3.5 h-3.5" />
