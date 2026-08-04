@@ -11,6 +11,7 @@ router.use(requireAuth);
 // Ticket CRUD
 router.post('/', validateRequest(createTicketSchema), TicketsController.createTicket);
 router.get('/', TicketsController.getTickets);
+router.get('/summary', TicketsController.getSummary);
 router.get('/:id', TicketsController.getTicketById);
 router.delete('/:id', requireRole(['ADMIN']), TicketsController.deleteTicket); // Only admins can delete
 

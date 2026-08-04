@@ -187,6 +187,9 @@ export const api = {
         body: JSON.stringify({ priority })
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
+    },
+    getSummary: async (): Promise<any> => {
+      return fetchClient<any>('/tickets/summary');
     }
   },
   agents: {
