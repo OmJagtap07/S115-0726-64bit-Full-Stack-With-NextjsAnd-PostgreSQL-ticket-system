@@ -160,11 +160,35 @@ export class TicketsService {
     if (!ticket) throw new NotFoundError('Ticket not found');
     this.authorizeTicketAccess(user, ticket);
 
+    if (ticket.status === TicketStatus.CLOSED || ticket.status === TicketStatus.RESOLVED) {
+      throw new ConflictError('Cannot reply to a resolved or closed ticket.');
+    }
+
+    const isInternal = user.role === Role.CUSTOMER ? false : data.isInternal;
+
     const reply = await replyRepo.create({
       ticketId,
       userId: user.userId,
       message: data.message,
-      isInternal: data.isInternal,
+      isInternal,
+    });
+
+    let details = 'Replied';
+    if (isInternal) {
+      details = 'Internal note added';
+    } else if (user.role === Role.CUSTOMER) {
+      details = 'Customer replied';
+    } else if (user.role === Role.AGENT) {
+      details = 'Agent replied';
+    } else if (user.role === Role.ADMIN) {
+      details = 'Admin replied';
+    }
+
+    await activityRepo.create({
+      ticketId,
+      actorId: user.userId,
+      type: ActivityType.REPLIED,
+      details,
     });
 
     return reply;

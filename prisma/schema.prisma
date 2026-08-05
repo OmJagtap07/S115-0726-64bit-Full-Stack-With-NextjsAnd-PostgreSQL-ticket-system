@@ -33,6 +33,7 @@ enum ActivityType {
   STATUS_CHANGED
   CLOSED
   REOPENED
+  REPLIED
 }
 
 model User {
