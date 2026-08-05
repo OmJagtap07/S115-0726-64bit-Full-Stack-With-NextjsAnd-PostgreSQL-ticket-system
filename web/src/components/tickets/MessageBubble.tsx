@@ -4,20 +4,25 @@ import { TicketReplyDTO } from '@/lib/api';
 import { Check, Clock, AlertCircle, RefreshCw } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
-export type MessageStatus = 'sent' | 'sending' | 'failed';
+export type MessageStatus = 'sent' | 'sending';
 
 interface MessageBubbleProps {
   reply: TicketReplyDTO;
   status?: MessageStatus;
   isCurrentUser?: boolean; // If true, aligns right and uses brand color
-  onRetry?: () => void;
 }
 
-export function MessageBubble({ reply, status = 'sent', isCurrentUser = false, onRetry }: MessageBubbleProps) {
+export function MessageBubble({ reply, status = 'sent', isCurrentUser = false }: MessageBubbleProps) {
   const alignClass = isCurrentUser ? "justify-end" : "justify-start";
-  const bubbleClass = isCurrentUser 
+  let bubbleClass = isCurrentUser 
     ? "bg-primary text-primary-foreground rounded-tr-none" 
     : "bg-muted text-foreground rounded-tl-none";
+
+  if (reply.isInternal) {
+    bubbleClass = isCurrentUser
+      ? "bg-amber-500 text-white rounded-tr-none"
+      : "bg-amber-100 text-amber-900 rounded-tl-none border border-amber-200";
+  }
 
   const initials = reply.user?.name?.substring(0, 2).toUpperCase() || 'U';
 
@@ -44,6 +49,11 @@ export function MessageBubble({ reply, status = 'sent', isCurrentUser = false, o
           <span className="text-xs text-muted-foreground">
             {formatTime(reply.createdAt)}
           </span>
+          {reply.isInternal && (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">
+              Internal Note
+            </span>
+          )}
         </div>
 
         <div className={cn("px-4 py-3 rounded-2xl shadow-sm text-sm whitespace-pre-wrap leading-relaxed", bubbleClass)}>
@@ -57,21 +67,6 @@ export function MessageBubble({ reply, status = 'sent', isCurrentUser = false, o
               <>
                 <Clock className="w-3.5 h-3.5 text-muted-foreground animate-pulse" />
                 <span className="text-xs text-muted-foreground font-medium">Sending...</span>
-              </>
-            )}
-            
-            {status === 'failed' && (
-              <>
-                <AlertCircle className="w-3.5 h-3.5 text-destructive" />
-                <span className="text-xs text-destructive font-medium">Failed to send</span>
-                {onRetry && (
-                  <button 
-                    onClick={onRetry}
-                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 ml-1"
-                  >
-                    <RefreshCw className="w-3 h-3" /> Retry
-                  </button>
-                )}
               </>
             )}
           </div>

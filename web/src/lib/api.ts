@@ -156,11 +156,11 @@ export const api = {
       const replies = await fetchClient<any[]>(`/tickets/${id}/replies`);
       return replies.map(r => ({ ...r, createdAt: new Date(r.createdAt) }));
     },
-    reply: async (id: string, message: string, shouldFail = false): Promise<TicketReplyDTO> => {
+    reply: async (id: string, message: string, isInternal: boolean = false, shouldFail: boolean = false): Promise<TicketReplyDTO> => {
       if (shouldFail) throw new ApiError(500, "Simulated network failure");
       const r = await fetchClient<any>(`/tickets/${id}/replies`, {
         method: 'POST',
-        body: JSON.stringify({ message })
+        body: JSON.stringify({ message, isInternal })
       });
       return { ...r, createdAt: new Date(r.createdAt) };
     },

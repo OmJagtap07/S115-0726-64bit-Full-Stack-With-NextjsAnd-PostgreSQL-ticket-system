@@ -56,8 +56,8 @@ export default function TicketDetailsPage() {
 
   // Reply Mutation (Optimistic Update)
   const replyMutation = useMutation({
-    mutationFn: (message: string) => api.tickets.reply(ticketId, message, forceFail),
-    onMutate: async (newMessage) => {
+    mutationFn: ({ message, isInternal }: { message: string; isInternal: boolean }) => api.tickets.reply(ticketId, message, isInternal, forceFail),
+    onMutate: async ({ message, isInternal }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['replies', ticketId] });
 
@@ -68,11 +68,16 @@ export default function TicketDetailsPage() {
       const optimisticReply: TicketReplyDTO = {
         id: `temp_${Date.now()}`,
         ticketId,
-        userId: 'a1',
-        message: newMessage,
-        isInternal: false,
+        userId: currentUser?.id || 'temp',
+        message: message,
+        isInternal: isInternal,
         createdAt: new Date(),
-        user: { id: 'a1', name: 'Shruti J.', email: 'shruti@freshworks.com', role: 'AGENT' }
+        user: currentUser ? { 
+          id: currentUser.id, 
+          name: currentUser.name, 
+          email: currentUser.email, 
+          role: currentUser.role 
+        } : undefined
       };
 
       queryClient.setQueryData<TicketReplyDTO[]>(['replies', ticketId], (old) => {
@@ -80,45 +85,21 @@ export default function TicketDetailsPage() {
       });
 
       // To render the "sending" state, we'll keep track of this temp id in the mutation context
-      return { previousReplies, tempId: optimisticReply.id };
+      return { previousReplies };
     },
     onError: (err, newMessage, context) => {
-      // Don't rollback immediately, leave it in the list but mark it as failed (done via local state mapping if needed, 
-      // but actually React Query unmounts the optimistic state if we rollback. 
-      // To keep it as "failed" in the UI without rolling back, we must manually update the cache to flag it as failed).
-      
-      queryClient.setQueryData<TicketReplyDTO[]>(['replies', ticketId], (old) => {
-        if (!old) return old;
-        return old.map(reply => 
-          reply.id === context?.tempId ? { ...reply, id: `failed_${context.tempId}` } : reply
-        );
-      });
-      // We do NOT rollback here so the user sees the failed bubble and can click retry
+      // Rollback to previous state on error
+      if (context?.previousReplies) {
+        queryClient.setQueryData(['replies', ticketId], context.previousReplies);
+      }
     },
-    onSuccess: (data, variables, context) => {
-      // Replace the optimistic temp message with the real one from the server
-      queryClient.setQueryData<TicketReplyDTO[]>(['replies', ticketId], (old) => {
-        if (!old) return old;
-        return old.map(reply => 
-          reply.id === context?.tempId ? data : reply
-        );
-      });
+    onSettled: () => {
+      // Always refetch after error or success to ensure cache consistency
+      queryClient.invalidateQueries({ queryKey: ['replies', ticketId] });
     }
   });
 
-  // Handle Retry
-  const handleRetry = (failedId: string, message: string) => {
-    // Remove the failed message from cache
-    queryClient.setQueryData<TicketReplyDTO[]>(['replies', ticketId], (old) => {
-      if (!old) return old;
-      return old.filter(r => r.id !== failedId);
-    });
-    // Fire mutation again
-    setForceFail(false); // Ensure it succeeds this time for demo purposes
-    replyMutation.mutate(message);
-  };
-
-  const statusMutation = useMutation({
+  // Status Mutation
     mutationFn: (newStatus: TicketStatus) => api.tickets.updateStatus(ticketId, newStatus),
     onSuccess: (data) => {
       setLocalStatus(data.status as TicketStatus);
@@ -276,15 +257,12 @@ export default function TicketDetailsPage() {
                   // Determine status based on optimistic ID patterns
                   let status: MessageStatus = 'sent';
                   if (reply.id.startsWith('temp_')) status = 'sending';
-                  if (reply.id.startsWith('failed_')) status = 'failed';
-
                   return (
                     <MessageBubble 
                       key={reply.id} 
                       reply={reply} 
                       isCurrentUser={isCurrentUser} 
                       status={status}
-                      onRetry={status === 'failed' ? () => handleRetry(reply.id, reply.message) : undefined}
                     />
                   );
                 })}
@@ -293,8 +271,9 @@ export default function TicketDetailsPage() {
           </div>
 
           <ReplyBox 
-            onSend={(msg) => replyMutation.mutate(msg)} 
+            onSend={(msg, isInternal) => replyMutation.mutate({ message: msg, isInternal })} 
             isSending={replyMutation.isPending && !forceFail} 
+            userRole={currentUser?.role}
           />
           
         </div>
