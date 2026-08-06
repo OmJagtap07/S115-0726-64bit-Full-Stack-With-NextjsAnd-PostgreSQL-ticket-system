@@ -21,7 +21,7 @@ const navConfig: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['customer', 'agent', 'admin'] },
   { title: 'Tickets', href: '/dashboard/tickets', icon: Ticket, roles: ['customer', 'agent', 'admin'] },
   { title: 'Agents', href: '/dashboard/agents', icon: Users, roles: ['admin'] },
-  { title: 'Reports', href: '/dashboard/reports', icon: FileText, roles: ['admin'] },
+  { title: 'Analytics', href: '/dashboard/analytics', icon: FileText, roles: ['admin'] },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['admin'] },
   { title: 'Profile', href: '/profile', icon: User, roles: ['customer', 'agent', 'admin'] },
 ];

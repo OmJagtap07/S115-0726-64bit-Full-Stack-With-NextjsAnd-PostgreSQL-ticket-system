@@ -56,8 +56,8 @@ export default function TicketDetailsPage() {
 
   // Reply Mutation (Optimistic Update)
   const replyMutation = useMutation({
-    mutationFn: ({ message, isInternal }: { message: string; isInternal: boolean }) => api.tickets.reply(ticketId, message, isInternal, forceFail),
-    onMutate: async ({ message, isInternal }) => {
+    mutationFn: ({ message, isInternal, file }: { message: string; isInternal: boolean, file?: File }) => api.tickets.reply(ticketId, message, isInternal, file, forceFail),
+    onMutate: async ({ message, isInternal, file }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['replies', ticketId] });
 
@@ -77,7 +77,8 @@ export default function TicketDetailsPage() {
           name: currentUser.name, 
           email: currentUser.email, 
           role: currentUser.role 
-        } : undefined
+        } : undefined,
+        attachments: file ? [{ id: 'temp', filename: file.name, url: '#', mimeType: file.type, size: file.size }] : []
       };
 
       queryClient.setQueryData<TicketReplyDTO[]>(['replies', ticketId], (old) => {
@@ -271,7 +272,7 @@ export default function TicketDetailsPage() {
           </div>
 
           <ReplyBox 
-            onSend={(msg, isInternal) => replyMutation.mutate({ message: msg, isInternal })} 
+            onSend={(msg, isInternal, file) => replyMutation.mutate({ message: msg, isInternal, file })} 
             isSending={replyMutation.isPending && !forceFail} 
             userRole={currentUser?.role}
           />

@@ -1,14 +1,17 @@
 import { CreateTicketDto, ReplyTicketDto, UpdateStatusDto, AssignTicketDto, UpdatePriorityDto } from './tickets.dto';
-import { PrismaTicketRepository, PrismaTicketReplyRepository, PrismaTicketActivityRepository, PrismaUserRepository } from '../../infrastructure/repositories/PrismaRepositories';
+import { PrismaTicketRepository, PrismaTicketReplyRepository, PrismaTicketActivityRepository, PrismaUserRepository, PrismaAttachmentRepository } from '../../infrastructure/repositories/PrismaRepositories';
+import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { NotFoundError, ForbiddenError, BadRequestError, ConflictError } from '../../core/errors/AppError';
-import { TicketStatus, ActivityType, Priority, Role } from '@prisma/client';
+import { TicketStatus, ActivityType, Priority, Role, NotificationType } from '@prisma/client';
 import { prisma } from '../../core/database/prisma';
+import { NotificationsService } from '../notifications/notifications.service';
 import crypto from 'crypto';
 
 const ticketRepo = new PrismaTicketRepository();
 const replyRepo = new PrismaTicketReplyRepository();
 const activityRepo = new PrismaTicketActivityRepository();
 const userRepo = new PrismaUserRepository();
+const attachmentRepo = new PrismaAttachmentRepository();
 
 interface AuthUser {
   userId: string;
@@ -63,8 +66,8 @@ export class TicketsService {
     return ticketRepo.findById(ticket.id);
   }
 
-  static async getTickets(filters?: any, skip?: number, take?: number) {
-    return ticketRepo.findAll(filters, skip, take);
+  static async getTickets(filters?: any, skip?: number, take?: number, orderBy?: any) {
+    return ticketRepo.findAll(filters, skip, take, orderBy);
   }
 
   static async getTicketById(ticketId: string, user: AuthUser) {
@@ -95,6 +98,16 @@ export class TicketsService {
       details: `Status changed from ${ticket.status} to ${data.status}`,
     });
 
+    if (data.status === TicketStatus.RESOLVED) {
+      NotificationsService.createNotification({
+        userId: ticket.customerId,
+        ticketId,
+        title: 'Ticket Resolved',
+        message: `Your ticket ${ticket.ticketNumber} has been marked as resolved.`,
+        type: NotificationType.TICKET_RESOLVED
+      });
+    }
+
     return updated;
   }
 
@@ -121,6 +134,14 @@ export class TicketsService {
       actorId: user.userId,
       type,
       details: `Assigned to ${data.assigneeId}`,
+    });
+
+    NotificationsService.createNotification({
+      userId: data.assigneeId,
+      ticketId,
+      title: 'Ticket Assigned',
+      message: `Ticket ${ticket.ticketNumber} has been assigned to you.`,
+      type: NotificationType.TICKET_ASSIGNED
     });
 
     return updated;
@@ -155,7 +176,7 @@ export class TicketsService {
     return replies;
   }
 
-  static async replyToTicket(ticketId: string, user: AuthUser, data: ReplyTicketDto) {
+  static async replyToTicket(ticketId: string, user: AuthUser, data: ReplyTicketDto, file?: Express.Multer.File) {
     const ticket = await ticketRepo.findById(ticketId);
     if (!ticket) throw new NotFoundError('Ticket not found');
     this.authorizeTicketAccess(user, ticket);
@@ -173,6 +194,18 @@ export class TicketsService {
       isInternal,
     });
 
+    if (file) {
+      const uploadResult = await CloudinaryService.uploadStream(file.buffer, `tickets/${ticketId}/replies/${reply.id}`);
+      await attachmentRepo.create({
+        ticketId,
+        replyId: reply.id,
+        filename: file.originalname,
+        url: uploadResult.secure_url,
+        mimeType: file.mimetype,
+        size: file.size,
+      });
+    }
+
     let details = 'Replied';
     if (isInternal) {
       details = 'Internal note added';
@@ -188,8 +221,60 @@ export class TicketsService {
       ticketId,
       actorId: user.userId,
       type: ActivityType.REPLIED,
-      details,
+      details: file ? `${details} with attachment` : details,
     });
+
+    // Notify appropriately
+    if (isInternal) {
+      // Internal note - if admin adds note on assigned ticket, notify agent
+      if (user.role === Role.ADMIN && ticket.assigneeId && ticket.assigneeId !== user.userId) {
+        NotificationsService.createNotification({
+          userId: ticket.assigneeId,
+          ticketId,
+          title: 'Internal Note Added',
+          message: `An internal note was added to ${ticket.ticketNumber} by an Admin.`,
+          type: NotificationType.INTERNAL_NOTE
+        });
+      }
+    } else if (user.role === Role.CUSTOMER) {
+      if (ticket.assigneeId) {
+        NotificationsService.createNotification({
+          userId: ticket.assigneeId,
+          ticketId,
+          title: 'Customer Replied',
+          message: `The customer replied to ${ticket.ticketNumber}.`,
+          type: NotificationType.CUSTOMER_REPLY
+        });
+      } else {
+        // Unassigned ticket - notify Admins
+        const admins = await userRepo.findAll({ role: Role.ADMIN });
+        for (const admin of admins) {
+          NotificationsService.createNotification({
+            userId: admin.id,
+            ticketId,
+            title: 'Customer Replied',
+            message: `A customer replied to unassigned ticket ${ticket.ticketNumber}.`,
+            type: NotificationType.CUSTOMER_REPLY
+          });
+        }
+      }
+    } else {
+      // Agent or Admin replied
+      NotificationsService.createNotification({
+        userId: ticket.customerId,
+        ticketId,
+        title: 'Agent Replied',
+        message: `An agent replied to your ticket ${ticket.ticketNumber}.`,
+        type: NotificationType.AGENT_REPLY
+      });
+    }
+
+    // We must return the reply with the attachment included, so we refetch it if file exists
+    if (file) {
+      const replies = await replyRepo.findAllByTicket(ticketId);
+      const updatedReply = replies.find(r => r.id === reply.id);
+      return updatedReply || reply;
+    }
 
     return reply;
   }
@@ -200,6 +285,22 @@ export class TicketsService {
     this.authorizeTicketAccess(user, ticket);
 
     return ticketRepo.softDelete(ticketId);
+  }
+
+  static async getAttachmentSecurely(ticketId: string, attachmentId: string, user: AuthUser) {
+    const ticket = await ticketRepo.findById(ticketId);
+    if (!ticket) throw new NotFoundError('Ticket not found');
+    this.authorizeTicketAccess(user, ticket);
+
+    const attachment = await prisma.attachment.findUnique({
+      where: { id: attachmentId },
+    });
+
+    if (!attachment || attachment.ticketId !== ticketId) {
+      throw new NotFoundError('Attachment not found');
+    }
+
+    return attachment;
   }
 
   static async getSummary(user: AuthUser) {

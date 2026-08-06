@@ -36,6 +36,14 @@ enum ActivityType {
   REPLIED
 }
 
+enum NotificationType {
+  TICKET_ASSIGNED
+  CUSTOMER_REPLY
+  AGENT_REPLY
+  INTERNAL_NOTE
+  TICKET_RESOLVED
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -51,6 +59,7 @@ model User {
   ticketsAssigned Ticket[]         @relation("AssignedTickets")
   replies         TicketReply[]
   activities      TicketActivity[]
+  notifications   Notification[]
 }
 
 model Session {
@@ -143,4 +152,20 @@ model Attachment {
 
   @@index([ticketId])
   @@index([replyId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ticketId  String
+  ticket    Ticket           @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  title     String
+  message   String           @db.Text
+  type      NotificationType
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt(sort: Desc)])
 }
