@@ -33,8 +33,18 @@ export default function TicketsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TicketStatus | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState("");
+  const [customerFilter, setCustomerFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'ALL'>('ALL');
   const [agentFilter, setAgentFilter] = useState<string>('ALL');
+  
+  // Date Range
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  // Sorting
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -61,12 +71,15 @@ export default function TicketsPage() {
       let response = await api.tickets.list({ 
         status: activeTab === 'ALL' ? undefined : activeTab,
         search: searchQuery,
+        customer: customerFilter,
         priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
         assigneeId: agentFilter === 'ALL' ? undefined : (agentFilter === 'UNASSIGNED' ? 'null' : agentFilter),
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
         page: currentPage,
         limit: itemsPerPage,
-        sortBy: 'createdAt',
-        sortOrder: 'desc'
+        sortBy,
+        sortOrder
       });
 
       return response;
@@ -80,7 +93,7 @@ export default function TicketsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, activeTab, priorityFilter, agentFilter]);
+  }, [searchQuery, customerFilter, activeTab, priorityFilter, agentFilter, sortBy, sortOrder, startDate, endDate]);
 
   if (!currentUser) return <LoadingState message="Loading..." />;
 
@@ -184,12 +197,14 @@ export default function TicketsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mt-4 lg:mt-0">
-          <Filter className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+        <div className="flex flex-wrap items-center gap-3 mt-4 lg:mt-0">
+          <div className="flex items-center gap-2 mr-2">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+          </div>
           
           <Select value={priorityFilter} onValueChange={(v) => setPriorityFilter(v as any)}>
-            <SelectTrigger className="w-[140px] h-8 text-xs">
+            <SelectTrigger className="w-[120px] h-9 text-xs">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
@@ -202,18 +217,70 @@ export default function TicketsPage() {
 
           {isAdmin && (
             <Select value={agentFilter} onValueChange={(v) => setAgentFilter(v || 'ALL')}>
-              <SelectTrigger className="w-[160px] h-8 text-xs">
+              <SelectTrigger className="w-[140px] h-9 text-xs">
                 <SelectValue placeholder="Agent" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All Agents</SelectItem>
                 <SelectItem value="UNASSIGNED">Unassigned</SelectItem>
+                <SelectItem value="ASSIGNED">Assigned</SelectItem>
                 {agents?.map(a => (
                   <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           )}
+
+          {isAdmin && (
+             <Input 
+               placeholder="Customer name/email" 
+               className="w-[160px] h-9 text-xs"
+               value={customerFilter}
+               onChange={(e) => setCustomerFilter(e.target.value)}
+             />
+          )}
+
+          <div className="flex items-center gap-1">
+             <Input 
+               type="date"
+               className="w-[130px] h-9 text-xs"
+               value={startDate}
+               onChange={(e) => setStartDate(e.target.value)}
+             />
+             <span className="text-muted-foreground text-xs">to</span>
+             <Input 
+               type="date"
+               className="w-[130px] h-9 text-xs"
+               value={endDate}
+               onChange={(e) => setEndDate(e.target.value)}
+             />
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto">
+            <span className="text-sm font-medium text-muted-foreground">Sort:</span>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[120px] h-9 text-xs">
+                <SelectValue placeholder="Sort By" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="createdAt">Created Date</SelectItem>
+                <SelectItem value="updatedAt">Updated Date</SelectItem>
+                <SelectItem value="priority">Priority</SelectItem>
+                <SelectItem value="status">Status</SelectItem>
+                <SelectItem value="ticketNumber">Ticket Number</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortOrder} onValueChange={setSortOrder}>
+              <SelectTrigger className="w-[90px] h-9 text-xs">
+                <SelectValue placeholder="Order" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Desc</SelectItem>
+                <SelectItem value="asc">Asc</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
@@ -234,9 +301,14 @@ export default function TicketsPage() {
             actionLabel="Clear Filters"
             onAction={() => {
               setSearchQuery("");
+              setCustomerFilter("");
+              setStartDate("");
+              setEndDate("");
               setActiveTab("ALL");
               setPriorityFilter("ALL");
               setAgentFilter("ALL");
+              setSortBy("createdAt");
+              setSortOrder("desc");
             }}
           />
         ) : (

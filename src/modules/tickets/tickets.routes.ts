@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { TicketsController } from './tickets.controller';
 import { validateRequest } from '../../core/middlewares/validateRequest';
 import { requireAuth, requireRole } from '../../core/middlewares/requireAuth';
+import { uploadMiddleware } from '../../core/middlewares/upload.middleware';
 import { createTicketSchema, replyTicketSchema, updateStatusSchema, assignTicketSchema, updatePrioritySchema } from './tickets.dto';
 
 const router = Router();
@@ -21,7 +22,11 @@ router.patch('/:id/assign', requireRole(['ADMIN']), validateRequest(assignTicket
 router.patch('/:id/priority', requireRole(['ADMIN', 'AGENT']), validateRequest(updatePrioritySchema), TicketsController.updatePriority);
 
 // Replies
+// Replies with optional attachment
 router.get('/:id/replies', TicketsController.getReplies);
-router.post('/:id/replies', validateRequest(replyTicketSchema), TicketsController.replyToTicket);
+router.post('/:id/replies', uploadMiddleware.single('file'), validateRequest(replyTicketSchema), TicketsController.replyToTicket);
+
+// Secure Attachment Download
+router.get('/:id/attachments/:attachmentId', TicketsController.downloadAttachment);
 
 export default router;

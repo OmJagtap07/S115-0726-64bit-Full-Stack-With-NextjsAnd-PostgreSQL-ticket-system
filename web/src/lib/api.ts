@@ -33,6 +33,29 @@ export interface TicketReplyDTO {
   message: string;
   isInternal: boolean;
   createdAt: Date;
+  attachments?: any[];
+}
+
+export interface NotificationDTO {
+  id: string;
+  userId: string;
+  ticketId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: Date;
+}
+
+export interface AnalyticsOverviewDTO {
+  total: number;
+  open: number;
+  inProgress: number;
+  resolved: number;
+  closed: number;
+  createdToday: number;
+  closedToday: number;
+  averageResolutionTimeMs: number;
 }
 
 // Custom Error Class
@@ -57,6 +80,11 @@ async function fetchClient<T>(endpoint: string, options: RequestInit & { returnF
       ...fetchOptions.headers,
     },
   };
+
+  if (fetchOptions.body instanceof FormData) {
+    // Let browser set the Content-Type with boundary
+    delete (config.headers as Record<string, string>)['Content-Type'];
+  }
 
   const response = await fetch(`/api${endpoint}`, config);
 
@@ -132,7 +160,19 @@ export const api = {
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },
-    list: async (params?: { status?: TicketStatus, search?: string, priority?: Priority, assigneeId?: string, page?: number, limit?: number, sortBy?: string, sortOrder?: string }): Promise<{ data: TicketDTO[], meta: { total: number, page: number, limit: number, totalPages: number } }> => {
+    list: async (params?: { 
+      status?: TicketStatus, 
+      search?: string, 
+      priority?: Priority, 
+      assigneeId?: string, 
+      page?: number, 
+      limit?: number, 
+      sortBy?: string, 
+      sortOrder?: string,
+      customer?: string,
+      startDate?: string,
+      endDate?: string
+    }): Promise<{ data: TicketDTO[], meta: { total: number, page: number, limit: number, totalPages: number } }> => {
       const query = new URLSearchParams();
       if (params?.status) query.append('status', params.status);
       if (params?.search) query.append('search', params.search);
@@ -142,6 +182,9 @@ export const api = {
       if (params?.limit) query.append('limit', params.limit.toString());
       if (params?.sortBy) query.append('sortBy', params.sortBy);
       if (params?.sortOrder) query.append('sortOrder', params.sortOrder);
+      if (params?.customer) query.append('customer', params.customer);
+      if (params?.startDate) query.append('startDate', params.startDate);
+      if (params?.endDate) query.append('endDate', params.endDate);
       const qs = query.toString();
       
       const response = await fetchClient<{ data: any[], meta: any }>(`/tickets${qs ? `?${qs}` : ''}`, { returnFullResponse: true });
@@ -159,11 +202,23 @@ export const api = {
       const replies = await fetchClient<any[]>(`/tickets/${id}/replies`);
       return replies.map(r => ({ ...r, createdAt: new Date(r.createdAt) }));
     },
-    reply: async (id: string, message: string, isInternal: boolean = false, shouldFail: boolean = false): Promise<TicketReplyDTO> => {
+    reply: async (id: string, message: string, isInternal: boolean = false, file?: File, shouldFail: boolean = false): Promise<TicketReplyDTO> => {
       if (shouldFail) throw new ApiError(500, "Simulated network failure");
+      
+      let body: any;
+      if (file) {
+        const formData = new FormData();
+        formData.append('message', message);
+        formData.append('isInternal', String(isInternal));
+        formData.append('file', file);
+        body = formData;
+      } else {
+        body = JSON.stringify({ message, isInternal });
+      }
+
       const r = await fetchClient<any>(`/tickets/${id}/replies`, {
         method: 'POST',
-        body: JSON.stringify({ message, isInternal })
+        body
       });
       return { ...r, createdAt: new Date(r.createdAt) };
     },
@@ -195,6 +250,40 @@ export const api = {
   agents: {
     list: async (): Promise<UserDTO[]> => {
       return fetchClient<UserDTO[]>('/users/agents');
+    }
+  },
+  notifications: {
+    list: async (): Promise<NotificationDTO[]> => {
+      const data = await fetchClient<any[]>('/notifications');
+      return data.map((n: any) => ({ ...n, createdAt: new Date(n.createdAt) }));
+    },
+    getUnreadCount: async (): Promise<number> => {
+      const res = await fetchClient<{ count: number }>('/notifications/unread-count');
+      return res.count;
+    },
+    markAsRead: async (id: string): Promise<NotificationDTO> => {
+      const n = await fetchClient<any>(`/notifications/${id}/read`, { method: 'PATCH' });
+      return { ...n, createdAt: new Date(n.createdAt) };
+    },
+    markAllAsRead: async (): Promise<void> => {
+      await fetchClient<void>('/notifications/read-all', { method: 'PATCH' });
+    }
+  },
+  analytics: {
+    getOverview: async (): Promise<AnalyticsOverviewDTO> => {
+      return fetchClient<AnalyticsOverviewDTO>('/analytics/overview');
+    },
+    getTrends: async (): Promise<any[]> => {
+      return fetchClient<any[]>('/analytics/trends');
+    },
+    getWorkload: async (): Promise<any[]> => {
+      return fetchClient<any[]>('/analytics/workload');
+    },
+    getStatusDistribution: async (): Promise<any[]> => {
+      return fetchClient<any[]>('/analytics/status');
+    },
+    getPriorityDistribution: async (): Promise<any[]> => {
+      return fetchClient<any[]>('/analytics/priority');
     }
   }
 };

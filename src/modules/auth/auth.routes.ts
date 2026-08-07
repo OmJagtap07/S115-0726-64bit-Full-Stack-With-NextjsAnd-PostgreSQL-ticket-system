@@ -33,7 +33,7 @@ router.post('/register-admin', authRateLimitMiddleware, validateRequest(register
  *         description: Login successful
  */
 router.post('/login', authRateLimitMiddleware, validateRequest(loginSchema), AuthController.login);
-router.post('/register', authRateLimitMiddleware, validateRequest(registerAdminSchema), AuthController.register);
+
 router.post('/refresh-token', authRateLimitMiddleware, validateRequest(refreshTokenSchema), AuthController.refreshToken);
 router.post('/logout', authRateLimitMiddleware, validateRequest(refreshTokenSchema), AuthController.logout);
 

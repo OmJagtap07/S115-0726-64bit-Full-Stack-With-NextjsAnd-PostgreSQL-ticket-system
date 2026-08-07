@@ -10,7 +10,10 @@ An enterprise-grade, full-stack Customer Support Ticket Management System built 
 
 > **Team:** Om Jagtap (Backend) · Shruti Itkalkar (Frontend) · Aayushman Shukla (Middleware & Testing)
 
----
+We have comprehensive guides available for all aspects of the system:
+- [Architecture Guide](./docs/architecture.md)
+- [API Documentation](./docs/api-guide.md)
+- [Deployment Checklist](./docs/deployment.md)
 
 ## Key Features
 

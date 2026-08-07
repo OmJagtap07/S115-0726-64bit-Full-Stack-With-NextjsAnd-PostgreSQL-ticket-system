@@ -2,6 +2,7 @@ import { Request, Response, NextFunction  } from 'express';
 import { TicketsService } from './tickets.service';
 import { Role } from '@prisma/client';
 import { logger } from '../../core/logger/winston';
+import { BadRequestError } from '../../core/errors/AppError';
 
 export class TicketsController {
   static async createTicket(req: Request, res: Response, next: NextFunction) {
@@ -25,24 +26,64 @@ export class TicketsController {
       if (req.user!.role === Role.CUSTOMER) {
         filters.customerId = req.user!.userId;
       } else if (req.user!.role === Role.AGENT) {
-        filters.assigneeId = req.user!.userId;
+        // If agent, they can see all tickets unless specifically filtered to their own
       }
 
       if (req.query.status) filters.status = req.query.status;
       if (req.query.priority) filters.priority = req.query.priority;
-      if (req.query.assigneeId) {
-        filters.assigneeId = req.query.assigneeId === 'null' ? null : req.query.assigneeId;
+      
+      if (req.query.assigneeId === 'unassigned') {
+        filters.assigneeId = null;
+      } else if (req.query.assigneeId === 'assigned') {
+        filters.assigneeId = { not: null };
+      } else if (req.query.assigneeId) {
+        filters.assigneeId = req.query.assigneeId;
       }
 
-      // Simple Search by subject or ticket number
+      if (req.query.startDate && req.query.endDate) {
+        filters.createdAt = {
+          gte: new Date(req.query.startDate as string),
+          lte: new Date(req.query.endDate as string)
+        };
+      } else if (req.query.startDate) {
+        filters.createdAt = { gte: new Date(req.query.startDate as string) };
+      } else if (req.query.endDate) {
+        filters.createdAt = { lte: new Date(req.query.endDate as string) };
+      }
+
+      if (req.query.customer) {
+        filters.customer = {
+          OR: [
+            { name: { contains: req.query.customer as string, mode: 'insensitive' } },
+            { email: { contains: req.query.customer as string, mode: 'insensitive' } }
+          ]
+        };
+      }
+
+      // Simple Search by subject or ticket number, description, customer
       if (req.query.search) {
         filters.OR = [
-          { ticketNumber: { contains: req.query.search, mode: 'insensitive' } },
-          { subject: { contains: req.query.search, mode: 'insensitive' } }
+          { ticketNumber: { contains: req.query.search as string, mode: 'insensitive' } },
+          { subject: { contains: req.query.search as string, mode: 'insensitive' } },
+          { description: { contains: req.query.search as string, mode: 'insensitive' } },
+          { customer: { name: { contains: req.query.search as string, mode: 'insensitive' } } },
+          { customer: { email: { contains: req.query.search as string, mode: 'insensitive' } } }
         ];
       }
 
-      const tickets = await TicketsService.getTickets(filters, skip, limit);
+      // Sorting logic
+      let orderBy: any = { createdAt: 'desc' };
+      if (req.query.sortBy) {
+        const sortField = req.query.sortBy as string;
+        const sortOrder = (req.query.sortOrder as string) === 'asc' ? 'asc' : 'desc';
+        
+        const allowedSortFields = ['createdAt', 'updatedAt', 'priority', 'status', 'ticketNumber'];
+        if (allowedSortFields.includes(sortField)) {
+          orderBy = { [sortField]: sortOrder };
+        }
+      }
+
+      const tickets = await TicketsService.getTickets(filters, skip, limit, orderBy);
       const totalPages = Math.ceil(tickets.total / limit);
       res.status(200).json({ 
         status: 'success', 
@@ -116,7 +157,7 @@ export class TicketsController {
          return res.status(403).json({ status: 'error', message: 'Customers cannot create internal notes' });
       }
 
-      const reply = await TicketsService.replyToTicket(req.params.id, req.user! as any, req.body);
+      const reply = await TicketsService.replyToTicket(req.params.id, req.user! as any, req.body, req.file);
       
       setImmediate(() => {
         try {
@@ -137,6 +178,16 @@ export class TicketsController {
     try {
       await TicketsService.softDeleteTicket(req.params.id, req.user! as any);
       res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async downloadAttachment(req: Request, res: Response, next: NextFunction) {
+    try {
+      const attachment = await TicketsService.getAttachmentSecurely(req.params.id, req.params.attachmentId, req.user! as any);
+      // Redirect to the secure Cloudinary URL
+      res.redirect(302, attachment.url);
     } catch (error) {
       next(error);
     }

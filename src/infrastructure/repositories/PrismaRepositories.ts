@@ -1,5 +1,5 @@
 import { PrismaClient, User, Session, Ticket, TicketReply, TicketActivity, Attachment } from '@prisma/client';
-import { IUserRepository, ISessionRepository, ITicketRepository, ITicketReplyRepository, ITicketActivityRepository, IAttachmentRepository } from '../../core/repositories/interfaces';
+import { IUserRepository, ISessionRepository, ITicketRepository, ITicketReplyRepository, ITicketActivityRepository, IAttachmentRepository, INotificationRepository } from '../../core/repositories/interfaces';
 import { prisma } from '../../core/database/prisma';
 
 export class PrismaUserRepository implements IUserRepository {
@@ -70,15 +70,16 @@ export class PrismaTicketRepository implements ITicketRepository {
     return prisma.ticket.findUnique({ where: { ticketNumber } });
   }
 
-  async findAll(filters?: any, skip?: number, take?: number): Promise<{ data: Ticket[]; total: number }> {
+  async findAll(filters?: any, skip?: number, take?: number, orderBy?: any): Promise<{ data: Ticket[]; total: number }> {
     const where = filters || { deletedAt: null };
+    const sort = orderBy || { createdAt: 'desc' };
     const [data, total] = await Promise.all([
       prisma.ticket.findMany({
         where,
         skip,
         take,
         include: { customer: true, assignee: true },
-        orderBy: { createdAt: 'desc' }
+        orderBy: sort
       }),
       prisma.ticket.count({ where })
     ]);
@@ -132,5 +133,46 @@ export class PrismaTicketActivityRepository implements ITicketActivityRepository
 export class PrismaAttachmentRepository implements IAttachmentRepository {
   async create(data: any): Promise<Attachment> {
     return prisma.attachment.create({ data });
+  }
+}
+
+export class PrismaNotificationRepository implements INotificationRepository {
+  async create(data: any): Promise<any> {
+    return prisma.notification.create({ data });
+  }
+
+  async findByUserId(userId: string): Promise<any[]> {
+    return prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50 // Limit to 50 most recent notifications
+    });
+  }
+
+  async countUnread(userId: string): Promise<number> {
+    return prisma.notification.count({
+      where: { userId, isRead: false }
+    });
+  }
+
+  async markAsRead(id: string, userId: string): Promise<any> {
+    await prisma.notification.updateMany({
+      where: { id, userId },
+      data: { isRead: true }
+    });
+    return prisma.notification.findUnique({ where: { id } });
+  }
+
+  async markAllAsRead(userId: string): Promise<void> {
+    await prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true }
+    });
+  }
+
+  async delete(id: string, userId: string): Promise<void> {
+    await prisma.notification.deleteMany({
+      where: { id, userId }
+    });
   }
 }

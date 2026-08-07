@@ -16,7 +16,7 @@ export interface ISessionRepository {
 export interface ITicketRepository {
   findById(id: string): Promise<any>;
   findByTicketNumber(ticketNumber: string): Promise<any>;
-  findAll(filters?: any, skip?: number, take?: number): Promise<{ data: any[]; total: number }>;
+  findAll(filters?: any, skip?: number, take?: number, orderBy?: any): Promise<{ data: Ticket[]; total: number }>;
   create(data: any): Promise<any>;
   update(id: string, data: any): Promise<any>;
   softDelete(id: string): Promise<any>;
@@ -34,4 +34,13 @@ export interface ITicketActivityRepository {
 
 export interface IAttachmentRepository {
   create(data: any): Promise<any>;
+}
+
+export interface INotificationRepository {
+  create(data: any): Promise<any>;
+  findByUserId(userId: string): Promise<any[]>;
+  countUnread(userId: string): Promise<number>;
+  markAsRead(id: string, userId: string): Promise<any>;
+  markAllAsRead(userId: string): Promise<void>;
+  delete(id: string, userId: string): Promise<void>;
 }
