@@ -1,4 +1,4 @@
-# Freshworks Ticket System
+# Freshworks Ticket Management System
 
 ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
@@ -6,9 +6,9 @@
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-A modern, enterprise-grade ticketing platform for support teams, built to handle role-based workflows, ticket lifecycle management, and real-time collaboration.
+An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks by **Team 115**. Powered by Next.js App Router, PostgreSQL, and Prisma.
 
-## 📖 Documentation Directory
+> **Team:** Om Jagtap (Backend) · Shruti Itkalkar (Frontend) · Aayushman Shukla (Middleware & Testing)
 
 We have comprehensive guides available for all aspects of the system:
 - [Architecture Guide](./docs/architecture.md)
@@ -16,6 +16,19 @@ We have comprehensive guides available for all aspects of the system:
 - [Deployment Checklist](./docs/deployment.md)
 
 ## Key Features
+
+| Feature | Description |
+|---|---|
+| **Role-Based Access Control** | Distinct dashboards and permissions for Admin, Agent, and Customer roles |
+| **Ticket Lifecycle** | Full ticket workflow: OPEN → IN_PROGRESS → RESOLVED → CLOSED |
+| **Optimistic UI** | Replies appear instantly; status updates confirmed without page reload |
+| **Conversation Threads** | Rich message history with timestamps and sender info per ticket |
+| **Assignment Modal** | Admins can assign/reassign tickets to agents via a polished UI |
+| **Admin Panel** | Dedicated agent management page only accessible by Admins |
+| **Error Boundaries** | Global `error.tsx` and `not-found.tsx` for graceful failure handling |
+| **Toast Notifications** | Inline feedback for status changes and assignment actions |
+| **Protected Routes** | Next.js middleware guards all private routes with JWT verification |
+| **Unauthorized Page** | Custom access-denied page for role-based route violations |
 
 - Role-based access for Admin, Agent, and Customer users
 - Ticket lifecycle management with statuses such as Open, In Progress, Resolved, and Closed
@@ -26,42 +39,70 @@ We have comprehensive guides available for all aspects of the system:
 - Rate limiting, logging, and structured error handling
 - Clean UI for managing tickets and support workflows
 
+---
+
 ## Tech Stack
 
-### Backend
-- Node.js + Express
-- TypeScript
-- Prisma ORM
-- PostgreSQL
-- Redis-backed caching support
-- JWT-based authentication
-- Zod for validation
+- **Frontend:** Next.js 16 (App Router), React, TypeScript
+- **Styling:** Tailwind CSS, Lucide Icons, Framer Motion
+- **State Management:** TanStack React Query (optimistic updates)
+- **Backend:** Node.js + Express, Next.js Route Handlers (BFF pattern)
+- **Database:** PostgreSQL via Neon (serverless) / Docker
+- **ORM:** Prisma
+- **Auth:** JWT (`jose`) with secure HTTP-only cookies
+- **Validation:** Zod, React Hook Form
+- **Developer Tools:** Docker Compose, Prisma Studio, Vitest
 
-### Frontend
-- Next.js
-- React
-- Tailwind CSS
-- shadcn/ui components
+---
 
-### Developer Tools
-- Docker Compose
-- Prisma Studio / Prisma Migrate
-- Vitest for backend testing
+## 📖 Documentation Directory
 
-## Project Structure
+We have comprehensive guides available for all aspects of the system.
+
+---
+
+## Architecture
+
+This project follows a strict **Backend-for-Frontend (BFF)** pattern:
 
 ```text
 .
 ├── prisma/                  # Prisma schema, migrations, and seed data
 ├── src/                     # Backend application source
 │   ├── modules/             # Auth, user, and ticket modules
-│   ├── core/               # Shared infrastructure and middleware
-│   └── server.ts           # Application entry point
+│   ├── core/                # Shared infrastructure and middleware
+│   └── server.ts            # Application entry point
 ├── web/                     # Next.js frontend application
-├── docker-compose.yml      # PostgreSQL container configuration
+├── docker-compose.yml       # PostgreSQL container configuration
 ├── package.json             # Backend scripts and dependencies
 └── readme.md                # Project documentation
 ```
+
+```
+web/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/           # Login & Register pages
+│   │   ├── (dashboard)/      # Protected dashboard layout
+│   │   │   └── dashboard/
+│   │   │       ├── tickets/  # Ticket list & detail pages
+│   │   │       └── agents/   # Admin-only agent management
+│   │   ├── unauthorized/     # RBAC access-denied page
+│   │   ├── error.tsx         # Global error boundary
+│   │   └── not-found.tsx     # Global 404 page
+│   ├── components/
+│   │   ├── layout/           # Header, Sidebar
+│   │   ├── tickets/          # TicketCard, MessageBubble, ReplyBox
+│   │   └── ui/               # Shared design system components
+│   ├── lib/
+│   │   └── api.ts            # Typed API client
+│   ├── middleware.ts          # JWT auth + RBAC route protection
+│   └── server/               # Server-side services & validators
+└── prisma/
+    └── schema.prisma          # Full data model
+```
+
+---
 
 ## Getting Started
 
@@ -92,7 +133,8 @@ JWT_EXPIRES_IN="15m"
 JWT_REFRESH_SECRET="your_refresh_secret"
 JWT_REFRESH_EXPIRES_IN="7d"
 ```
-Note: Ensure PORT is set to 5001, as the Next.js frontend proxy (next.config.mjs) routes /api requests to http://127.0.0.1:5001/api/v1/.
+
+> Note: Ensure PORT is set to 5001, as the Next.js frontend proxy (next.config.mjs) routes /api requests to http://127.0.0.1:5001/api/v1/.
 
 ### 3. Start the database
 
@@ -116,7 +158,7 @@ npm install
 cd ..
 ```
 
-Here, you can test endpoints (like `/auth/login` and `/auth/register-admin`) directly from the UI without needing Postman.
+### 5. Database Setup
 
 Generate the Prisma Client types for TypeScript and initialize the database.
 
@@ -137,38 +179,86 @@ npx prisma db seed
 
 Run the backend from the project root:
 
-- **Role-Based Workflows:** Distinct permissions and views for Admins, Agents, and Customers.
-- **Ticket Lifecycle:** Manage tickets through statuses (Open, In Progress, Resolved, Closed) with priorities.
-- **Audit Trails:** Immutable activity tracking for ticket changes and assignments.
-- **Secure Authentication:** JWT-based stateless auth backed by HTTP-only refresh tokens.
-- **Clean Architecture:** Modular monolith backend design paired with a responsive Next.js frontend.
-
-## Project Structure
-
-```text
-.
-├── docs/                    # Detailed technical guides
-├── prisma/                  # Database schema, migrations, and seed data
-├── src/                     # Backend API application
-│   ├── modules/             # Business logic (Auth, Users, Tickets)
-│   ├── core/                # Infrastructure (Middlewares, Logger, Swagger)
-│   └── server.ts            # Entry point
-├── web/                     # Next.js Frontend
-└── docker-compose.yml       # Infrastructure orchestration
+```bash
+npm run dev
 ```
 
-The backend API will run on `http://localhost:5001` and the frontend UI on `http://localhost:3000`.
+In a separate terminal, start the frontend:
 
-## Database Model
+```bash
+cd web && npm run dev
+```
 
-The Prisma schema includes the following core models:
+Open [http://localhost:3000](http://localhost:3000).
 
-- `User` for authentication and role management
-- `Session` for refresh token handling
-- `Ticket` for support requests and lifecycle state
-- `TicketReply` for threaded communication
-- `TicketActivity` for audit/history tracking
-- `Attachment` for file support
+---
+
+## User Guide
+
+### As a Customer
+1. **Register** at `/register` and log in.
+2. On the **Dashboard**, view your open tickets.
+3. **Click a ticket** to open the conversation thread.
+4. Use the **Reply Box** at the bottom to respond — replies appear instantly (optimistic UI).
+
+### As an Agent
+1. Log in with an Agent account (role must be set by an Admin).
+2. Your dashboard shows only **tickets assigned to you**.
+3. Open a ticket to **change its status** (Open → In Progress → Resolved → Closed) using the dropdown at the top.
+4. You can **reply** to any conversation in your queue.
+
+### As an Admin
+1. Log in with an Admin account.
+2. Your dashboard shows **all tickets** in the system.
+3. Use the **Assign** button on any ticket card to assign it to an agent.
+4. Navigate to **Dashboard → Agents** to view all registered agents in the system.
+5. You have full access to all ticket conversations and status controls.
+
+---
+
+## Testing Roles
+
+The easiest way to test all three roles:
+
+1. **Register 3 accounts** via `/register` (all default to `CUSTOMER`).
+2. Open Prisma Studio:
+   ```bash
+   cd web
+   npx prisma studio
+   ```
+3. At [http://localhost:5555](http://localhost:5555), set one user's role to `ADMIN` and another to `AGENT`.
+4. Open **3 browser profiles** (or Incognito windows) and log in with each account simultaneously.
+
+---
+
+## Contributing
+
+1. Fork the repository and create a feature branch.
+2. Use descriptive branch names such as `feature/your-feature` or `fix/bug-name`.
+3. Keep changes focused and document significant updates.
+4. Test your changes locally before opening a pull request.
+5. Submit a pull request with a clear summary of the change.
+
+### Branch Naming
+
+| Branch prefix | Purpose |
+|---|---|
+| `main` | Stable, production-ready code |
+| `feature/*` | New feature development |
+| `fix/*` | Bug fixes |
+| `docs/*` | Documentation updates |
+
+### Creating a PR
+
+```bash
+git checkout -b feature/your-feature-name
+git add .
+git commit -m "feat: describe your change"
+git push origin feature/your-feature-name
+# Open a Pull Request on GitHub targeting main
+```
+
+---
 
 ## Available Scripts
 
@@ -183,19 +273,15 @@ The Prisma schema includes the following core models:
 - `cd web && npm run build` — create a production build
 - `cd web && npm run lint` — run ESLint checks
 
-## Contribution Guidelines
-
-1. Fork the repository and create a feature branch.
-2. Use descriptive branch names such as `feature/your-feature` or `fix/bug-name`.
-3. Keep changes focused and document significant updates.
-4. Test your changes locally before opening a pull request.
-5. Submit a pull request with a clear summary of the change.
+---
 
 ## Team
 
-- **Om Jagtap** — Backend Architecture & Refactoring
-- **Aayushman Shukla** — Middleware, Testing, and Deployment
-- **Shruti Itkalkar** — Frontend Development
+| Member | Role |
+|---|---|
+| **Om Jagtap** | Backend Development — API routes, services, database models |
+| **Shruti Itkalkar** | Frontend Development — UI components, pages, design system |
+| **Aayushman Shukla** | Middleware, Auth, Testing & Deployment |
 
 ## License
 

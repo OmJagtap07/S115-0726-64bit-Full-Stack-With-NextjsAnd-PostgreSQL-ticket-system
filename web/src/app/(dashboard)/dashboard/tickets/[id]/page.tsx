@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronDown, Check } from 'lucide-react';
 import Link from 'next/link';
-import { TicketStatus } from '@prisma/client';
+
+type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
 import { api, TicketReplyDTO } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
