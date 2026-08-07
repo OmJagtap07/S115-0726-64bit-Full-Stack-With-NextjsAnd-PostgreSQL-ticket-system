@@ -103,6 +103,8 @@ model Ticket {
   @@index([status])
   @@index([assigneeId, status])
   @@index([customerId, status])
+  @@index([createdAt])
+  @@index([deletedAt])
 }
 
 model TicketReply {

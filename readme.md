@@ -11,6 +11,9 @@ A modern, enterprise-grade ticketing platform for support teams, built to handle
 ## 📖 Documentation Directory
 
 We have comprehensive guides available for all aspects of the system:
+- [Architecture Guide](./docs/architecture.md)
+- [API Documentation](./docs/api-guide.md)
+- [Deployment Checklist](./docs/deployment.md)
 
 ## Key Features
 
