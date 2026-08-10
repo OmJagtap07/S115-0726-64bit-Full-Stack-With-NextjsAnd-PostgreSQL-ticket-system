@@ -102,6 +102,7 @@ export default function TicketDetailsPage() {
   });
 
   // Status Mutation
+  const statusMutation = useMutation({
     mutationFn: (newStatus: TicketStatus) => api.tickets.updateStatus(ticketId, newStatus),
     onSuccess: (data) => {
       setLocalStatus(data.status as TicketStatus);
