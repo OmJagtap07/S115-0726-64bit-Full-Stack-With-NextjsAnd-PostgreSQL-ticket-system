@@ -258,7 +258,7 @@ export default function TicketsPage() {
 
           <div className="flex items-center gap-2 ml-auto">
             <span className="text-sm font-medium text-muted-foreground">Sort:</span>
-            <Select value={sortBy} onValueChange={setSortBy}>
+            <Select value={sortBy} onValueChange={(val) => setSortBy(val as string)}>
               <SelectTrigger className="w-[120px] h-9 text-xs">
                 <SelectValue placeholder="Sort By" />
               </SelectTrigger>
@@ -271,7 +271,7 @@ export default function TicketsPage() {
               </SelectContent>
             </Select>
 
-            <Select value={sortOrder} onValueChange={setSortOrder}>
+            <Select value={sortOrder} onValueChange={(val) => setSortOrder(val as string)}>
               <SelectTrigger className="w-[90px] h-9 text-xs">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
