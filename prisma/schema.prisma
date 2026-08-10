@@ -94,9 +94,10 @@ model Ticket {
   closedAt  DateTime?
   deletedAt DateTime?
 
-  replies     TicketReply[]
-  attachments Attachment[]
-  activities  TicketActivity[]
+  replies       TicketReply[]
+  attachments   Attachment[]
+  activities    TicketActivity[]
+  notifications Notification[]
 
   @@index([customerId])
   @@index([assigneeId])
