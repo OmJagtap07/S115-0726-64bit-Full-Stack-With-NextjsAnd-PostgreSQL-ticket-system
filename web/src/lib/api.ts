@@ -69,17 +69,18 @@ export class ApiError extends Error {
 // Fetch Wrapper
 async function fetchClient<T>(endpoint: string, options: RequestInit & { returnFullResponse?: boolean } = {}): Promise<T> {
   const { returnFullResponse, ...fetchOptions } = options;
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-
   const config: RequestInit = {
     ...fetchOptions,
     headers: {
-      ...defaultHeaders,
       ...fetchOptions.headers,
     },
   };
+
+  const method = (config.method || 'GET').toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD') {
+    (config.headers as Record<string, string>)['Content-Type'] = 
+      (config.headers as Record<string, string>)['Content-Type'] || 'application/json';
+  }
 
   if (fetchOptions.body instanceof FormData) {
     // Let browser set the Content-Type with boundary
