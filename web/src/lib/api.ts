@@ -36,16 +36,7 @@ export interface TicketReplyDTO {
   attachments?: any[];
 }
 
-export interface NotificationDTO {
-  id: string;
-  userId: string;
-  ticketId: string;
-  title: string;
-  message: string;
-  type: string;
-  isRead: boolean;
-  createdAt: Date;
-}
+
 
 export interface AnalyticsOverviewDTO {
   total: number;
@@ -248,23 +239,6 @@ export const api = {
   agents: {
     list: async (): Promise<UserDTO[]> => {
       return fetchClient<UserDTO[]>('/users/agents');
-    }
-  },
-  notifications: {
-    list: async (): Promise<NotificationDTO[]> => {
-      const data = await fetchClient<any[]>('/notifications');
-      return data.map((n: any) => ({ ...n, createdAt: new Date(n.createdAt) }));
-    },
-    getUnreadCount: async (): Promise<number> => {
-      const res = await fetchClient<{ count: number }>('/notifications/unread-count');
-      return res.count;
-    },
-    markAsRead: async (id: string): Promise<NotificationDTO> => {
-      const n = await fetchClient<any>(`/notifications/${id}/read`, { method: 'PATCH' });
-      return { ...n, createdAt: new Date(n.createdAt) };
-    },
-    markAllAsRead: async (): Promise<void> => {
-      await fetchClient<void>('/notifications/read-all', { method: 'PATCH' });
     }
   },
   analytics: {
