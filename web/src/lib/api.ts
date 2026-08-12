@@ -23,6 +23,7 @@ export interface TicketDTO {
   assignee?: UserDTO | null;
   createdAt: Date;
   updatedAt: Date;
+  attachments?: any[];
 }
 
 export interface TicketReplyDTO {
@@ -204,8 +205,7 @@ export const api = {
       const replies = await fetchClient<any[]>(`/tickets/${id}/replies`);
       return replies.map(r => ({ ...r, createdAt: new Date(r.createdAt) }));
     },
-    reply: async (id: string, message: string, isInternal: boolean = false, file?: File, shouldFail: boolean = false): Promise<TicketReplyDTO> => {
-      if (shouldFail) throw new ApiError(500, "Simulated network failure");
+    reply: async (id: string, message: string, isInternal: boolean = false, file?: File): Promise<TicketReplyDTO> => {
       
       let body: any;
       if (file) {
