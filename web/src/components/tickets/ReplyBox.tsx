@@ -87,7 +87,7 @@ export function ReplyBox({ onSend, isSending, userRole, className }: ReplyBoxPro
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isSending}
-          placeholder="Type your reply here... (Ctrl/Cmd + Enter to send)"
+          placeholder="Type your reply here..."
           className={cn(
             "w-full min-h-[80px] max-h-[200px] resize-none px-3 pb-12 bg-transparent outline-none text-sm placeholder:text-muted-foreground disabled:opacity-50",
             selectedFile ? "pt-1" : "pt-3"
@@ -115,21 +115,7 @@ export function ReplyBox({ onSend, isSending, userRole, className }: ReplyBoxPro
               <Paperclip className="w-4 h-4" />
             </Button>
             
-            {(userRole === 'ADMIN' || userRole === 'AGENT') && (
-              <label className="flex items-center gap-1.5 ml-2 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors select-none">
-                <input 
-                  type="checkbox" 
-                  checked={isInternal}
-                  onChange={(e) => setIsInternal(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-500 cursor-pointer"
-                />
-                <span className={isInternal ? "text-amber-600 font-semibold" : ""}>Internal Note</span>
-              </label>
-            )}
 
-            <div className="text-xs text-muted-foreground font-medium hidden sm:block ml-2">
-              <span className="opacity-75">Tip:</span> Press <kbd className="px-1.5 py-0.5 mx-0.5 bg-muted rounded border border-border">Ctrl</kbd> + <kbd className="px-1.5 py-0.5 mx-0.5 bg-muted rounded border border-border">Enter</kbd> to send
-            </div>
           </div>
           
           <Button 

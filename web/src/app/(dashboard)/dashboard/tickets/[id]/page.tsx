@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ChevronDown, Check } from 'lucide-react';
+import { ArrowLeft, ChevronDown, Check, Download, FileText, Paperclip } from 'lucide-react';
 import Link from 'next/link';
 
 type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
@@ -24,8 +24,7 @@ export default function TicketDetailsPage() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
   
-  // To manually trigger failure for testing the Error state
-  const [forceFail, setForceFail] = useState(false);
+  // Local state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Queries
@@ -58,7 +57,7 @@ export default function TicketDetailsPage() {
 
   // Reply Mutation (Optimistic Update)
   const replyMutation = useMutation({
-    mutationFn: ({ message, isInternal, file }: { message: string; isInternal: boolean, file?: File }) => api.tickets.reply(ticketId, message, isInternal, file, forceFail),
+    mutationFn: ({ message, isInternal, file }: { message: string; isInternal: boolean, file?: File }) => api.tickets.reply(ticketId, message, isInternal, file),
     onMutate: async ({ message, isInternal, file }) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['replies', ticketId] });
@@ -218,6 +217,53 @@ export default function TicketDetailsPage() {
             <div className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
               {ticket.description}
             </div>
+            
+            {ticket.attachments && ticket.attachments.length > 0 && (
+              <div className="mt-4 space-y-2 pt-4 border-t border-border">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Attachments</h3>
+                {ticket.attachments.map(att => {
+                  const isImage = att.mimeType.startsWith('image/');
+                  const downloadUrl = `/api/tickets/${ticketId}/attachments/${att.id}`;
+                  
+                  return (
+                    <div key={att.id} className="flex flex-col gap-2 p-2 rounded-lg border bg-background border-border">
+                      {isImage ? (
+                        <div className="relative group overflow-hidden rounded-md max-w-sm">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={downloadUrl} alt={att.filename} className="w-full h-auto object-cover max-h-48 rounded-md" />
+                          <a 
+                            href={downloadUrl} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white"
+                          >
+                            <Download className="w-6 h-6" />
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-muted/50 flex items-center justify-center shrink-0">
+                            {att.mimeType === 'application/pdf' ? <FileText className="w-5 h-5" /> : <Paperclip className="w-5 h-5" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-semibold truncate" title={att.filename}>{att.filename}</div>
+                            <div className="text-[10px] opacity-80">{(att.size / 1024).toFixed(1)} KB</div>
+                          </div>
+                          <a 
+                            href={downloadUrl} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="p-2 rounded-full hover:bg-black/10 transition-colors text-primary"
+                          >
+                            <Download className="w-4 h-4" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="pt-4 border-t border-border/50 text-xs text-muted-foreground space-y-2">
@@ -231,15 +277,7 @@ export default function TicketDetailsPage() {
             </div>
           </div>
           
-          {/* Debug Toggle for Reviewing Phase 4 Error State - Hidden for Customers */}
-          {currentUser?.role !== 'CUSTOMER' && (
-            <div className="pt-8 opacity-30 hover:opacity-100 transition-opacity">
-              <label className="flex items-center gap-2 text-xs cursor-pointer">
-                <input type="checkbox" checked={forceFail} onChange={(e) => setForceFail(e.target.checked)} />
-                Force network failure on next reply
-              </label>
-            </div>
-          )}
+
 
         </div>
 
@@ -276,7 +314,7 @@ export default function TicketDetailsPage() {
 
           <ReplyBox 
             onSend={(msg, isInternal, file) => replyMutation.mutate({ message: msg, isInternal, file })} 
-            isSending={replyMutation.isPending && !forceFail} 
+            isSending={replyMutation.isPending} 
             userRole={currentUser?.role}
           />
           
