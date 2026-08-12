@@ -2,9 +2,8 @@ import { CreateTicketDto, ReplyTicketDto, UpdateStatusDto, AssignTicketDto, Upda
 import { PrismaTicketRepository, PrismaTicketReplyRepository, PrismaTicketActivityRepository, PrismaUserRepository, PrismaAttachmentRepository } from '../../infrastructure/repositories/PrismaRepositories';
 import { CloudinaryService } from '../../core/services/cloudinary.service';
 import { NotFoundError, ForbiddenError, BadRequestError, ConflictError } from '../../core/errors/AppError';
-import { TicketStatus, ActivityType, Priority, Role, NotificationType } from '@prisma/client';
+import { TicketStatus, ActivityType, Priority, Role } from '@prisma/client';
 import { prisma } from '../../core/database/prisma';
-import { NotificationsService } from '../notifications/notifications.service';
 import crypto from 'crypto';
 
 const ticketRepo = new PrismaTicketRepository();
@@ -99,13 +98,7 @@ export class TicketsService {
     });
 
     if (data.status === TicketStatus.RESOLVED) {
-      NotificationsService.createNotification({
-        userId: ticket.customerId,
-        ticketId,
-        title: 'Ticket Resolved',
-        message: `Your ticket ${ticket.ticketNumber} has been marked as resolved.`,
-        type: NotificationType.TICKET_RESOLVED
-      });
+      // Notification removed
     }
 
     return updated;
@@ -134,14 +127,6 @@ export class TicketsService {
       actorId: user.userId,
       type,
       details: `Assigned to ${data.assigneeId}`,
-    });
-
-    NotificationsService.createNotification({
-      userId: data.assigneeId,
-      ticketId,
-      title: 'Ticket Assigned',
-      message: `Ticket ${ticket.ticketNumber} has been assigned to you.`,
-      type: NotificationType.TICKET_ASSIGNED
     });
 
     return updated;
@@ -226,47 +211,15 @@ export class TicketsService {
 
     // Notify appropriately
     if (isInternal) {
-      // Internal note - if admin adds note on assigned ticket, notify agent
-      if (user.role === Role.ADMIN && ticket.assigneeId && ticket.assigneeId !== user.userId) {
-        NotificationsService.createNotification({
-          userId: ticket.assigneeId,
-          ticketId,
-          title: 'Internal Note Added',
-          message: `An internal note was added to ${ticket.ticketNumber} by an Admin.`,
-          type: NotificationType.INTERNAL_NOTE
-        });
-      }
+      // Internal note - notification removed
     } else if (user.role === Role.CUSTOMER) {
       if (ticket.assigneeId) {
-        NotificationsService.createNotification({
-          userId: ticket.assigneeId,
-          ticketId,
-          title: 'Customer Replied',
-          message: `The customer replied to ${ticket.ticketNumber}.`,
-          type: NotificationType.CUSTOMER_REPLY
-        });
+        // Customer replied - notification removed
       } else {
-        // Unassigned ticket - notify Admins
-        const admins = await userRepo.findAll({ role: Role.ADMIN });
-        for (const admin of admins) {
-          NotificationsService.createNotification({
-            userId: admin.id,
-            ticketId,
-            title: 'Customer Replied',
-            message: `A customer replied to unassigned ticket ${ticket.ticketNumber}.`,
-            type: NotificationType.CUSTOMER_REPLY
-          });
-        }
+        // Unassigned ticket - notification removed
       }
     } else {
-      // Agent or Admin replied
-      NotificationsService.createNotification({
-        userId: ticket.customerId,
-        ticketId,
-        title: 'Agent Replied',
-        message: `An agent replied to your ticket ${ticket.ticketNumber}.`,
-        type: NotificationType.AGENT_REPLY
-      });
+      // Agent or Admin replied - notification removed
     }
 
     // We must return the reply with the attachment included, so we refetch it if file exists

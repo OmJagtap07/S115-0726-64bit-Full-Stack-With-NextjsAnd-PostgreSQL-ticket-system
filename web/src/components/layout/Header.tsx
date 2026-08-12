@@ -5,7 +5,6 @@ import { Bell } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { NotificationDropdown } from './NotificationDropdown';
 
 export function Header({ userName = "User", userInitials = "U", userRole = "Agent" }) {
   const roleBadgeVariant =
@@ -19,7 +18,6 @@ export function Header({ userName = "User", userInitials = "U", userRole = "Agen
       </div>
       
       <div className="flex items-center gap-6">
-        <NotificationDropdown />
         
         <div className="flex items-center gap-3 border-l border-border pl-6">
           <Avatar className="h-10 w-10 border-2 border-primary/10">

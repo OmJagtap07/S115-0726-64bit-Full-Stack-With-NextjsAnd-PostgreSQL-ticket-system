@@ -8,7 +8,6 @@ import { logger } from './core/logger/winston';
 import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
 import ticketsRoutes from './modules/tickets/tickets.routes';
-import notificationsRoutes from './modules/notifications/notifications.routes';
 import analyticsRoutes from './modules/analytics/analytics.routes';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './core/swagger';
@@ -48,7 +47,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', usersRoutes);
 app.use('/api/v1/tickets', ticketsRoutes);
-app.use('/api/v1/notifications', notificationsRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 
 // Centralized Error Handling

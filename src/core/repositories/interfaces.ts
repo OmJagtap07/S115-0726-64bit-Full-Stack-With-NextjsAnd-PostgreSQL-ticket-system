@@ -35,12 +35,3 @@ export interface ITicketActivityRepository {
 export interface IAttachmentRepository {
   create(data: any): Promise<any>;
 }
-
-export interface INotificationRepository {
-  create(data: any): Promise<any>;
-  findByUserId(userId: string): Promise<any[]>;
-  countUnread(userId: string): Promise<number>;
-  markAsRead(id: string, userId: string): Promise<any>;
-  markAllAsRead(userId: string): Promise<void>;
-  delete(id: string, userId: string): Promise<void>;
-}
