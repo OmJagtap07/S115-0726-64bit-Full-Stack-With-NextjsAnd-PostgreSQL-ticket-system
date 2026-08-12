@@ -131,14 +131,11 @@ export const api = {
     },
     // Server Component Helper
     meServer: async (roleCookieValue?: string): Promise<UserDTO> => {
-      // In a strict BFF Next.js app, Server Components shouldn't make HTTP requests to its own /api routes.
-      // Instead, they should query the Service directly. However, we'll keep the interface unified.
-      // We assume layout.tsx will fetch directly using services eventually, or we just rely on passing mock if no real backend yet.
-      // For now, since the Next.js API Routes don't exist yet, we can mock it here for the server ONLY.
       const role = (roleCookieValue || 'CUSTOMER').toUpperCase();
+      const name = role === 'ADMIN' ? 'Admin User' : role === 'AGENT' ? 'Agent User' : 'Standard User';
       return {
-        id: role === 'ADMIN' ? 'admin1' : 'user1',
-        name: role === 'ADMIN' ? 'Admin User' : 'Standard User',
+        id: role === 'ADMIN' ? 'admin1' : role === 'AGENT' ? 'agent1' : 'user1',
+        name,
         email: `mock-${role.toLowerCase()}@example.com`,
         role: role
       };

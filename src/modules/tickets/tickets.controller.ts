@@ -7,6 +7,9 @@ import { BadRequestError } from '../../core/errors/AppError';
 export class TicketsController {
   static async createTicket(req: Request, res: Response, next: NextFunction) {
     try {
+      if (req.user!.role !== Role.CUSTOMER) {
+        return res.status(403).json({ status: 'error', message: 'Only customers can create tickets' });
+      }
       const ticket = await TicketsService.createTicket(req.user!.userId, req.body);
       res.status(201).json({ status: 'success', data: ticket });
     } catch (error) {
@@ -97,7 +100,7 @@ export class TicketsController {
 
   static async getTicketById(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.getTicketById(req.params.id, req.user! as any);
+      const ticket = await TicketsService.getTicketById(req.params.id as string, req.user! as any);
 
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
@@ -116,7 +119,7 @@ export class TicketsController {
 
   static async updateStatus(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.updateStatus(req.params.id, req.user! as any, req.body);
+      const ticket = await TicketsService.updateStatus(req.params.id as string, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -125,7 +128,7 @@ export class TicketsController {
 
   static async assignTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.assignTicket(req.params.id, req.user! as any, req.body);
+      const ticket = await TicketsService.assignTicket(req.params.id as string, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -134,7 +137,7 @@ export class TicketsController {
 
   static async updatePriority(req: Request, res: Response, next: NextFunction) {
     try {
-      const ticket = await TicketsService.updatePriority(req.params.id, req.user! as any, req.body);
+      const ticket = await TicketsService.updatePriority(req.params.id as string, req.user! as any, req.body);
       res.status(200).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);
@@ -143,7 +146,7 @@ export class TicketsController {
 
   static async getReplies(req: Request, res: Response, next: NextFunction) {
     try {
-      const replies = await TicketsService.getReplies(req.params.id, req.user! as any);
+      const replies = await TicketsService.getReplies(req.params.id as string, req.user! as any);
       res.status(200).json({ status: 'success', data: replies });
     } catch (error) {
       next(error);
@@ -157,7 +160,7 @@ export class TicketsController {
          return res.status(403).json({ status: 'error', message: 'Customers cannot create internal notes' });
       }
 
-      const reply = await TicketsService.replyToTicket(req.params.id, req.user! as any, req.body, req.file);
+      const reply = await TicketsService.replyToTicket(req.params.id as string, req.user! as any, req.body, req.file);
       
       setImmediate(() => {
         try {
@@ -176,7 +179,7 @@ export class TicketsController {
 
   static async deleteTicket(req: Request, res: Response, next: NextFunction) {
     try {
-      await TicketsService.softDeleteTicket(req.params.id, req.user! as any);
+      await TicketsService.softDeleteTicket(req.params.id as string, req.user! as any);
       res.status(204).send();
     } catch (error) {
       next(error);
@@ -185,7 +188,7 @@ export class TicketsController {
 
   static async downloadAttachment(req: Request, res: Response, next: NextFunction) {
     try {
-      const attachment = await TicketsService.getAttachmentSecurely(req.params.id, req.params.attachmentId, req.user! as any);
+      const attachment = await TicketsService.getAttachmentSecurely(req.params.id as string, req.params.attachmentId as string, req.user! as any);
       // Redirect to the secure Cloudinary URL
       res.redirect(302, attachment.url);
     } catch (error) {

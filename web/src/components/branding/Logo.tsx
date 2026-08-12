@@ -37,7 +37,7 @@ export function Logo({
         alt="Freshworks Logo"
         role="presentation"
         src="https://dam.freshworks.com/m/1d230ee78c07681a/original/headerLogoLight.webp" 
-        className={cn("shrink-0 object-contain", sizeClasses[size])}
+        className={cn("shrink-0 object-contain", sizeClasses[size], isDarkBg && "brightness-0 invert")}
       />
     </div>
   );
