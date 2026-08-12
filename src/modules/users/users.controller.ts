@@ -22,7 +22,7 @@ export class UsersController {
 
   static async getUserById(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await UsersService.getUserById(req.params.id);
+      const user = await UsersService.getUserById(req.params.id as string);
       res.status(200).json({ status: 'success', data: user });
     } catch (error) {
       next(error);
@@ -49,7 +49,7 @@ export class UsersController {
 
   static async updateUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = await UsersService.updateUser(req.params.id, req.body);
+      const user = await UsersService.updateUser(req.params.id as string, req.body);
       res.status(200).json({ status: 'success', data: user });
     } catch (error) {
       next(error);

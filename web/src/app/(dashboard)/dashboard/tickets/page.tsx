@@ -66,7 +66,7 @@ export default function TicketsPage() {
   });
 
   const { data: ticketsResponse, isLoading, isError, refetch } = useQuery({
-    queryKey: ['tickets', activeTab, searchQuery, priorityFilter, agentFilter, currentPage, currentUser?.role],
+    queryKey: ['tickets', activeTab, searchQuery, priorityFilter, agentFilter, currentPage, currentUser?.role, sortBy, sortOrder],
     queryFn: async () => {
       let response = await api.tickets.list({ 
         status: activeTab === 'ALL' ? undefined : activeTab,
@@ -113,7 +113,7 @@ export default function TicketsPage() {
               : "Here are the tickets assigned to you."}
           </p>
         </div>
-        {!isAdmin && (
+        {currentUser?.role === 'CUSTOMER' && (
           <Button className="shrink-0 gap-1.5" onClick={() => router.push('/dashboard/tickets/new')}>
             <Plus className="w-4 h-4" />
             New Ticket
