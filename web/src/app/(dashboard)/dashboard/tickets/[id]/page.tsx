@@ -36,7 +36,8 @@ export default function TicketDetailsPage() {
 
   const { data: replies, isLoading: isLoadingReplies } = useQuery({
     queryKey: ['replies', ticketId],
-    queryFn: () => api.tickets.getReplies(ticketId)
+    queryFn: () => api.tickets.getReplies(ticketId),
+    refetchInterval: (ticket?.status === 'CLOSED' || ticket?.status === 'RESOLVED') ? false : 3000
   });
 
   const { data: currentUser } = useQuery({
