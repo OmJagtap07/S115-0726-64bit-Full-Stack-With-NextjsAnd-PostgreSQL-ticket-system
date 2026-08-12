@@ -10,7 +10,7 @@ export class TicketsController {
       if (req.user!.role !== Role.CUSTOMER) {
         return res.status(403).json({ status: 'error', message: 'Only customers can create tickets' });
       }
-      const ticket = await TicketsService.createTicket(req.user!.userId, req.body);
+      const ticket = await TicketsService.createTicket(req.user!.userId, req.body, req.file);
       res.status(201).json({ status: 'success', data: ticket });
     } catch (error) {
       next(error);

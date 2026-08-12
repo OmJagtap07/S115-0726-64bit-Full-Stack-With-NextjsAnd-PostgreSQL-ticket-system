@@ -143,9 +143,22 @@ export const api = {
   },
   tickets: {
     create: async (data: any): Promise<TicketDTO> => {
+      let body: any;
+      if (data.file) {
+        const formData = new FormData();
+        formData.append('subject', data.subject);
+        formData.append('description', data.description);
+        formData.append('priority', data.priority);
+        formData.append('file', data.file);
+        body = formData;
+      } else {
+        const { file, ...jsonData } = data;
+        body = JSON.stringify(jsonData);
+      }
+
       const t = await fetchClient<any>('/tickets', {
         method: 'POST',
-        body: JSON.stringify(data)
+        body
       });
       return { ...t, createdAt: new Date(t.createdAt), updatedAt: new Date(t.updatedAt) };
     },

@@ -20,6 +20,3 @@ The backend exposes a REST API via `/api/v1`. Full Swagger documentation is avai
 - `GET /api/v1/analytics/overview` - Fetch KPIs.
 - `GET /api/v1/analytics/trends` - Fetch volume trends.
 
-### Notifications
-- `GET /api/v1/notifications` - List notifications.
-- `GET /api/v1/notifications/unread-count` - Get unread count.
