@@ -181,6 +181,10 @@ export class TicketsService {
       throw new ConflictError('Cannot reply to a resolved or closed ticket.');
     }
 
+    if (!data.message && !file) {
+      throw new BadRequestError('A reply must contain either a message or an attachment.');
+    }
+
     const isInternal = user.role === Role.CUSTOMER ? false : data.isInternal;
 
     const reply = await replyRepo.create({

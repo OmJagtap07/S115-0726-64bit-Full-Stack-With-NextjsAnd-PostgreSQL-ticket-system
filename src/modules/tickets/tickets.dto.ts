@@ -10,7 +10,7 @@ export const createTicketSchema = z.object({
 
 export const replyTicketSchema = z.object({
   body: z.object({
-    message: z.string().min(1),
+    message: z.string().optional().default(''),
     isInternal: z.preprocess((val) => {
       if (typeof val === 'string') return val === 'true';
       return Boolean(val);
