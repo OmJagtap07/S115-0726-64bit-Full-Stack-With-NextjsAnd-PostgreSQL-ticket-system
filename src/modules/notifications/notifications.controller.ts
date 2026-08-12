@@ -22,7 +22,7 @@ export class NotificationsController {
 
   static async markAsRead(req: Request, res: Response, next: NextFunction) {
     try {
-      const notification = await NotificationsService.markAsRead(req.params.id, req.user!.userId);
+      const notification = await NotificationsService.markAsRead(req.params.id as string, req.user!.userId);
       if (!notification) {
         return res.status(404).json({ status: 'error', message: 'Notification not found' });
       }
@@ -43,7 +43,7 @@ export class NotificationsController {
 
   static async deleteNotification(req: Request, res: Response, next: NextFunction) {
     try {
-      await NotificationsService.deleteNotification(req.params.id, req.user!.userId);
+      await NotificationsService.deleteNotification(req.params.id as string, req.user!.userId);
       res.status(204).send();
     } catch (error) {
       next(error);
