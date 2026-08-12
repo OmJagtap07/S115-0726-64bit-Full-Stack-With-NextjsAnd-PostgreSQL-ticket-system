@@ -32,8 +32,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/auth/register-admin",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register-admin"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register-admin"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -65,8 +70,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -86,8 +96,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/auth/refresh-token",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "refresh-token"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -116,8 +131,12 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -137,8 +156,12 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets?page=1&limit=10",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets"
+              ],
               "query": [
                 {
                   "key": "page",
@@ -164,8 +187,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets", ":id"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                ":id"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -191,8 +219,14 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets/:id/status",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets", ":id", "status"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                ":id",
+                "status"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -222,8 +256,14 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets/:id/assign",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets", ":id", "assign"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                ":id",
+                "assign"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -253,8 +293,14 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets/:id/replies",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets", ":id", "replies"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                ":id",
+                "replies"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -280,8 +326,14 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/tickets/:id/replies",
-              "host": ["{{baseUrl}}"],
-              "path": ["tickets", ":id", "replies"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "tickets",
+                ":id",
+                "replies"
+              ],
               "variable": [
                 {
                   "key": "id",
@@ -308,8 +360,13 @@
             ],
             "url": {
               "raw": "{{baseUrl}}/users/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "me"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me"
+              ]
             }
           }
         }

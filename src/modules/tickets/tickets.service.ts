@@ -44,7 +44,7 @@ export class TicketsService {
 
     throw new ConflictError('Invalid state transition.');
   }
-  static async createTicket(customerId: string, data: CreateTicketDto) {
+  static async createTicket(customerId: string, data: CreateTicketDto, file?: Express.Multer.File) {
     const ticketNumber = `TKT-${crypto.randomInt(1000, 99999)}`;
 
     const ticket = await ticketRepo.create({
@@ -55,11 +55,22 @@ export class TicketsService {
       customerId,
     });
 
+    if (file) {
+      const uploadResult = await CloudinaryService.uploadStream(file.buffer, `tickets/${ticket.id}/attachments`);
+      await attachmentRepo.create({
+        ticketId: ticket.id,
+        filename: file.originalname,
+        url: uploadResult.secure_url,
+        mimeType: file.mimetype,
+        size: file.size,
+      });
+    }
+
     await activityRepo.create({
       ticketId: ticket.id,
       actorId: customerId,
       type: ActivityType.CREATED,
-      details: 'Ticket created',
+      details: file ? 'Ticket created with attachment' : 'Ticket created',
     });
 
     return ticketRepo.findById(ticket.id);

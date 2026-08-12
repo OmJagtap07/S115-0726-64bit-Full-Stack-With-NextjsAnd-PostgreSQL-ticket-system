@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeft, UploadCloud } from 'lucide-react';
+import { ArrowLeft, UploadCloud, X } from 'lucide-react';
 import Link from 'next/link';
 import { Priority } from '@/lib/api';
 
@@ -21,12 +21,13 @@ const createTicketSchema = z.object({
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT'])
 });
 
-type CreateTicketValues = z.infer<typeof createTicketSchema>;
+type CreateTicketValues = z.infer<typeof createTicketSchema> & { file?: File | null };
 
 export default function NewTicketPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CreateTicketValues>({
     resolver: zodResolver(createTicketSchema),
@@ -53,7 +54,13 @@ export default function NewTicketPage() {
 
   const onSubmit = (data: CreateTicketValues) => {
     setError(null);
-    createMutation.mutate(data);
+    createMutation.mutate({ ...data, file });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+    }
   };
 
   return (
@@ -119,15 +126,36 @@ export default function NewTicketPage() {
             <label className="text-sm font-semibold text-foreground flex justify-between">
               <span>Attachments (Optional)</span>
             </label>
-            <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group">
+            <div className="border-2 border-dashed border-border rounded-lg p-8 flex flex-col items-center justify-center text-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors relative group">
+              <input 
+                type="file" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleFileChange}
+                accept="image/*,.pdf,.doc,.docx"
+              />
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <UploadCloud className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Click to upload or drag and drop</p>
-                <p className="text-xs text-muted-foreground mt-1">SVG, PNG, JPG or GIF (max. 5MB)</p>
+                <p className="text-xs text-muted-foreground mt-1">Images, PDF, or Docs (max. 5MB)</p>
               </div>
             </div>
+            
+            {file && (
+              <div className="flex items-center justify-between p-3 bg-muted rounded-md border border-border mt-3">
+                <span className="text-sm truncate max-w-[80%]">{file.name}</span>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10" 
+                  onClick={() => setFile(null)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="pt-4 flex items-center justify-end gap-3 border-t border-border mt-8">
