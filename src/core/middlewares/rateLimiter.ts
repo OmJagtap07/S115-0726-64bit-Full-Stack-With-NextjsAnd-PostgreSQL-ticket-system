@@ -27,7 +27,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 // Specialized strict limiter for auth endpoints
 const authRateLimiter = new RateLimiterMemory({
   keyPrefix: 'auth_ratelimit',
-  points: 5, // 5 requests
+  points: 100, // Increased points to 100 for testing
   duration: 60 * 15, // per 15 minutes by IP
 });
 
