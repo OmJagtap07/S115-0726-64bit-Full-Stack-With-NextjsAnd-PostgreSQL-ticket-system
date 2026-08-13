@@ -47,13 +47,13 @@
   --input: #E5E7EB;
   --ring: var(--brand-purple);
   
-  --sidebar: var(--brand-dark);
-  --sidebar-foreground: #FFFFFF;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #111827;
   --sidebar-primary: var(--brand-purple);
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #1E293B;
+  --sidebar-accent: #F3F4F6;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #E5E7EB;
   --sidebar-ring: var(--brand-purple);
   
   /* Badges & Status */

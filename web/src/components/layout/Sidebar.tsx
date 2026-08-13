@@ -42,7 +42,7 @@ export function Sidebar({ currentRole = 'agent' }: { currentRole?: Role }) {
   return (
     <aside className="w-64 bg-sidebar flex flex-col h-screen sticky top-0 border-r border-sidebar-border text-sidebar-foreground">
       <div className="p-6 flex items-center">
-        <Logo variant="dark" size="md" />
+        <Logo variant="light" size="md" />
       </div>
 
       <div className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">

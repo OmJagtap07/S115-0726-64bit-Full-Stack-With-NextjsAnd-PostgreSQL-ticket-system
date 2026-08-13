@@ -7,21 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadingState, ErrorState } from '@/components/ui/states';
 import dynamic from 'next/dynamic';
 
-const LineChart = dynamic(() => import('recharts').then(mod => mod.LineChart), { ssr: false });
-const Line = dynamic(() => import('recharts').then(mod => mod.Line), { ssr: false });
-const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
-const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
-const CartesianGrid = dynamic(() => import('recharts').then(mod => mod.CartesianGrid), { ssr: false });
-const RechartsTooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
-const ResponsiveContainer = dynamic(() => import('recharts').then(mod => mod.ResponsiveContainer), { ssr: false });
-const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false });
-const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
-const PieChart = dynamic(() => import('recharts').then(mod => mod.PieChart), { ssr: false });
-const Pie = dynamic(() => import('recharts').then(mod => mod.Pie), { ssr: false });
-const Cell = dynamic(() => import('recharts').then(mod => mod.Cell), { ssr: false });
-const Legend = dynamic(() => import('recharts').then(mod => mod.Legend), { ssr: false });
-
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+const AdminCharts = dynamic(() => import('@/components/analytics/AdminCharts'), { ssr: false, loading: () => <div className="h-[300px] flex items-center justify-center border rounded-lg bg-card text-muted-foreground animate-pulse">Loading charts...</div> });
 
 export default function AnalyticsDashboardPage() {
   const { data: currentUser, isLoading: isUserLoading } = useQuery({
@@ -120,87 +106,12 @@ export default function AnalyticsDashboardPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Trends Chart */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader><CardTitle>Ticket Volume Trend (Last 30 Days)</CardTitle></CardHeader>
-          <CardContent className="h-[300px]">
-            {trends && trends.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={trends}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" tick={{fontSize: 12}} />
-                  <YAxis tick={{fontSize: 12}} />
-                  <RechartsTooltip />
-                  <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">No trend data available</div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Status Distribution */}
-        <Card>
-          <CardHeader><CardTitle>Status Distribution</CardTitle></CardHeader>
-          <CardContent className="h-[300px]">
-            {statusDist && statusDist.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={statusDist} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                    {statusDist.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Priority Distribution */}
-        <Card>
-          <CardHeader><CardTitle>Priority Distribution</CardTitle></CardHeader>
-          <CardContent className="h-[300px]">
-            {priorityDist && priorityDist.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={priorityDist} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} innerRadius={60} label>
-                    {priorityDist.map((_, index) => <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />)}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">No data available</div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Agent Workload */}
-        <Card className="col-span-1 lg:col-span-2">
-          <CardHeader><CardTitle>Agent Workload (Assigned Tickets)</CardTitle></CardHeader>
-          <CardContent className="h-[300px]">
-            {workload && workload.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={workload} layout="vertical" margin={{ left: 50 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
-                  <XAxis type="number" />
-                  <YAxis dataKey="agentName" type="category" tick={{fontSize: 12}} width={100} />
-                  <RechartsTooltip />
-                  <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">No workload data available</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <AdminCharts 
+        trends={trends || []}
+        statusDist={statusDist || []}
+        priorityDist={priorityDist || []}
+        workload={workload || []}
+      />
     </div>
   );
 }
