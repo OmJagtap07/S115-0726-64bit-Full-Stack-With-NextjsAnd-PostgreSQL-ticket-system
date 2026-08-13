@@ -9,6 +9,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { LoadingState, ErrorState } from '@/components/ui/states';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { InviteAgentModal } from '@/components/agents/InviteAgentModal';
 
 export default function AgentsPage() {
   const router = useRouter();
@@ -46,10 +47,7 @@ export default function AgentsPage() {
             View and manage support agents in your organization.
           </p>
         </div>
-        <Button className="shrink-0 gap-1.5">
-          <UserCog className="w-4 h-4" />
-          Invite Agent
-        </Button>
+        <InviteAgentModal />
       </div>
 
       {/* Agents List */}

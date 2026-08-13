@@ -254,6 +254,30 @@ export const api = {
       return fetchClient<UserDTO[]>('/users/agents');
     }
   },
+  users: {
+    create: async (data: any): Promise<UserDTO> => {
+      const response = await fetchClient<{ data: UserDTO }>('/users', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      return response.data;
+    },
+    list: async (filters?: { role?: Role, search?: string }): Promise<UserDTO[]> => {
+      const query = new URLSearchParams();
+      if (filters?.role) query.append('role', filters.role);
+      if (filters?.search) query.append('search', filters.search);
+      const qs = query.toString();
+      const response = await fetchClient<{ data: UserDTO[] }>(`/users${qs ? `?${qs}` : ''}`);
+      return response.data;
+    },
+    update: async (id: string, data: any): Promise<UserDTO> => {
+      const response = await fetchClient<{ data: UserDTO }>(`/users/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data)
+      });
+      return response.data;
+    }
+  },
   analytics: {
     getOverview: async (): Promise<AnalyticsOverviewDTO> => {
       return fetchClient<AnalyticsOverviewDTO>('/analytics/overview');
