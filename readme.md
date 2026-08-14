@@ -6,7 +6,7 @@
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks by **Team 115**. Powered by Next.js App Router, PostgreSQL, and Prisma.
+An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks by **Team 64bit**. Powered by Next.js App Router, PostgreSQL, and Prisma.
 
 > **Team:** Om Jagtap (Backend) · Shruti Itkalkar (Frontend) · Aayushman Shukla (Middleware & Testing)
 
