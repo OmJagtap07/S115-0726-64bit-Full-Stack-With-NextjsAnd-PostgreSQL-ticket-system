@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, ChevronDown, Check, Download, FileText, Paperclip } from 'lucide-react';
 import Link from 'next/link';
 
-type TicketStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+type TicketStatus = 'UNASSIGNED' | 'OPEN' | 'IN_PROGRESS' | 'CLOSED';
 
 import { api, TicketReplyDTO } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,7 @@ export default function TicketDetailsPage() {
   const { data: replies, isLoading: isLoadingReplies } = useQuery({
     queryKey: ['replies', ticketId],
     queryFn: () => api.tickets.getReplies(ticketId),
-    refetchInterval: (ticket?.status === 'CLOSED' || ticket?.status === 'RESOLVED') ? false : 3000
+    refetchInterval: (ticket?.status === 'CLOSED') ? false : 3000
   });
 
   const { data: currentUser } = useQuery({
@@ -124,14 +124,16 @@ export default function TicketDetailsPage() {
   if (isErrorTicket || !ticket) return <ErrorState title="Ticket Not Found" description="The ticket you are looking for does not exist." onRetry={() => router.push('/dashboard')} />;
 
   const statusVariant = 
+    displayStatus === 'UNASSIGNED' ? 'secondary' :
     displayStatus === 'OPEN' ? 'statusOpen' :
     displayStatus === 'IN_PROGRESS' ? 'statusProgress' :
-    displayStatus === 'RESOLVED' ? 'statusOnHold' : 'statusClosed';
+    'statusClosed';
 
   const statusLabel = 
+    displayStatus === 'UNASSIGNED' ? 'Unassigned' :
     displayStatus === 'OPEN' ? 'Open' :
     displayStatus === 'IN_PROGRESS' ? 'In Progress' :
-    displayStatus === 'RESOLVED' ? 'On Hold' : 'Closed';
+    'Closed';
 
   const priorityVariant = 
     ticket.priority === 'HIGH' || ticket.priority === 'URGENT' ? 'priorityHigh' : 
@@ -173,9 +175,9 @@ export default function TicketDetailsPage() {
                 </Button>
               } />
               <DropdownMenuContent align="end" className="w-[160px]">
+                <DropdownMenuItem onClick={() => handleStatusChange('UNASSIGNED')}>Unassigned</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStatusChange('OPEN')}>Open</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStatusChange('IN_PROGRESS')}>In Progress</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusChange('RESOLVED')}>On Hold</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleStatusChange('CLOSED')}>Closed</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -2,7 +2,7 @@ export interface OverviewDTO {
   total: number;
   open: number;
   inProgress: number;
-  resolved: number;
+  unassigned: number;
   closed: number;
   createdToday: number;
   closedToday: number;

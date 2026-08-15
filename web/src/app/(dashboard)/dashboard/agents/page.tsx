@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Shield, ShieldAlert, MoreHorizontal, UserCog } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -13,6 +13,7 @@ import { InviteAgentModal } from '@/components/agents/InviteAgentModal';
 
 export default function AgentsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const { data: currentUser, isLoading: isLoadingMe } = useQuery({
     queryKey: ['me'],
@@ -23,6 +24,14 @@ export default function AgentsPage() {
     queryKey: ['agents'],
     queryFn: () => api.agents.list(),
     enabled: currentUser?.role === 'ADMIN'
+  });
+
+  const demoteMutation = useMutation({
+    mutationFn: (id: string) => api.users.update(id, { role: 'CUSTOMER' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['customers-list'] });
+    }
   });
 
   if (isLoadingMe) return <LoadingState message="Verifying access..." />;
@@ -88,8 +97,7 @@ export default function AgentsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center font-medium text-foreground">
-                      {/* Random mock number for active tickets */}
-                      {Math.floor(Math.random() * 5) + 1}
+                      {agent._count?.ticketsAssigned || 0}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <DropdownMenu>
@@ -101,6 +109,12 @@ export default function AgentsPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem>View Profile</DropdownMenuItem>
                           <DropdownMenuItem>Assign Ticket</DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => demoteMutation.mutate(agent.id)}
+                            disabled={demoteMutation.isPending}
+                          >
+                            Demote to Customer
+                          </DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">Disable Account</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

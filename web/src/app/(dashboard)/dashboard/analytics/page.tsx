@@ -85,8 +85,8 @@ export default function AnalyticsDashboardPage() {
           <CardContent><div className="text-2xl font-bold">{overview?.inProgress || 0}</div></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Resolved</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{overview?.resolved || 0}</div></CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Unassigned</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-bold">{overview?.unassigned || 0}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">Closed</CardTitle></CardHeader>

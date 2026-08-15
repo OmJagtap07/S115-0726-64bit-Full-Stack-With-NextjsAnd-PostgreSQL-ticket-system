@@ -54,12 +54,12 @@ async function main() {
   console.log('Seeding 25 tickets...');
   
   const priorities = [Priority.LOW, Priority.MEDIUM, Priority.HIGH, Priority.URGENT];
-  const statuses = [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.RESOLVED, TicketStatus.CLOSED];
+  const statuses = [TicketStatus.OPEN, TicketStatus.IN_PROGRESS, TicketStatus.CLOSED];
 
   for (let i = 1; i <= 25; i++) {
     const customer = customers[Math.floor(Math.random() * customers.length)];
     const agent = Math.random() > 0.3 ? agents[Math.floor(Math.random() * agents.length)] : null; // 70% chance of being assigned
-    const status = agent ? statuses[Math.floor(Math.random() * statuses.length)] : TicketStatus.OPEN;
+    const status = agent ? statuses[Math.floor(Math.random() * statuses.length)] : TicketStatus.UNASSIGNED;
     const priority = priorities[Math.floor(Math.random() * priorities.length)];
 
     const ticket = await prisma.ticket.create({

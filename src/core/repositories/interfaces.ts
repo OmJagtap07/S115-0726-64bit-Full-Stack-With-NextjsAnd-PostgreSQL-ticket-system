@@ -1,7 +1,9 @@
+import { Ticket } from '@prisma/client';
+
 export interface IUserRepository {
   findById(id: string): Promise<any>;
   findByEmail(email: string): Promise<any>;
-  findAll(filters?: any): Promise<any[]>;
+  findAll(filters?: any, include?: any): Promise<any[]>;
   create(data: any): Promise<any>;
   update(id: string, data: any): Promise<any>;
 }

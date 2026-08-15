@@ -11,8 +11,8 @@ export class PrismaUserRepository implements IUserRepository {
     return prisma.user.findUnique({ where: { email } });
   }
 
-  async findAll(filters?: any): Promise<User[]> {
-    return prisma.user.findMany({ where: filters });
+  async findAll(filters?: any, include?: any): Promise<any[]> {
+    return prisma.user.findMany({ where: filters, include });
   }
 
   async create(data: any): Promise<User> {
