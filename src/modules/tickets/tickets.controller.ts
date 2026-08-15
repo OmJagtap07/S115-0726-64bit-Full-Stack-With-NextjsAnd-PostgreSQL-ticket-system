@@ -29,18 +29,20 @@ export class TicketsController {
       if (req.user!.role === Role.CUSTOMER) {
         filters.customerId = req.user!.userId;
       } else if (req.user!.role === Role.AGENT) {
-        // If agent, they can see all tickets unless specifically filtered to their own
+        filters.assigneeId = req.user!.userId;
       }
 
       if (req.query.status) filters.status = req.query.status;
       if (req.query.priority) filters.priority = req.query.priority;
       
-      if (req.query.assigneeId === 'unassigned') {
-        filters.assigneeId = null;
-      } else if (req.query.assigneeId === 'assigned') {
-        filters.assigneeId = { not: null };
-      } else if (req.query.assigneeId) {
-        filters.assigneeId = req.query.assigneeId;
+      if (req.user!.role === Role.ADMIN) {
+        if (req.query.assigneeId === 'unassigned') {
+          filters.assigneeId = null;
+        } else if (req.query.assigneeId === 'assigned') {
+          filters.assigneeId = { not: null };
+        } else if (req.query.assigneeId) {
+          filters.assigneeId = req.query.assigneeId;
+        }
       }
 
       if (req.query.startDate && req.query.endDate) {

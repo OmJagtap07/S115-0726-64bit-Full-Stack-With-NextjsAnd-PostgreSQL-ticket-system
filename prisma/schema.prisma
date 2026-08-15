@@ -13,9 +13,9 @@ enum Role {
 }
 
 enum TicketStatus {
+  UNASSIGNED
   OPEN
   IN_PROGRESS
-  RESOLVED
   CLOSED
 }
 
@@ -48,6 +48,12 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  phoneNumber  String?
+  employeeId   String?
+  timezone     String?
+  location     String?
+  avatarUrl    String?
+  
   sessions        Session[]
   ticketsCreated  Ticket[]         @relation("CustomerTickets")
   ticketsAssigned Ticket[]         @relation("AssignedTickets")
@@ -73,7 +79,7 @@ model Ticket {
   ticketNumber String       @unique // e.g., TKT-1001
   subject      String
   description  String       @db.Text
-  status       TicketStatus @default(OPEN)
+  status       TicketStatus @default(UNASSIGNED)
   priority     Priority     @default(MEDIUM)
 
   customerId String

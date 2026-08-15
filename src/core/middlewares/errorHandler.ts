@@ -25,10 +25,14 @@ export const errorHandler = (err: Error, req: Request, res: Response, next: Next
       statusCode = 409;
       title = 'Conflict';
       detail = 'A record with this value already exists.';
+    } else if (err.code === 'ETIMEDOUT' || err.code === 'P1001') {
+      statusCode = 503;
+      title = 'Database Connection Error';
+      detail = 'The database is currently unreachable or timed out.';
     } else {
       statusCode = 400;
       title = 'Database Error';
-      detail = 'A database constraint was violated.';
+      detail = `A database error occurred (${err.code}).`;
     }
   }
 

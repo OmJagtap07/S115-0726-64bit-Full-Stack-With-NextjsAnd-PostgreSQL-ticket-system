@@ -159,6 +159,12 @@ export default function TicketsPage() {
                 All
               </TabsTrigger>
               <TabsTrigger 
+                value="UNASSIGNED" 
+                className="rounded-full px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-muted/50 text-foreground"
+              >
+                Unassigned
+              </TabsTrigger>
+              <TabsTrigger 
                 value="OPEN" 
                 className="rounded-full px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-muted/50 text-foreground"
               >
@@ -169,12 +175,6 @@ export default function TicketsPage() {
                 className="rounded-full px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-muted/50 text-foreground"
               >
                 In Progress
-              </TabsTrigger>
-              <TabsTrigger 
-                value="RESOLVED" 
-                className="rounded-full px-4 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground bg-muted/50 text-foreground"
-              >
-                Resolved
               </TabsTrigger>
               <TabsTrigger 
                 value="CLOSED" 

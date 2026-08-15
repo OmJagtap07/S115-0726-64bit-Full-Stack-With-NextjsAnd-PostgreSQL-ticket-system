@@ -1,19 +1,20 @@
 # Freshworks Ticket Management System
 
+[![CI](https://github.com/kalviumcommunity/S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system/actions/workflows/ci.yml/badge.svg)](https://github.com/kalviumcommunity/S115-0726-64bit-Full-Stack-With-NextjsAnd-PostgreSQL-ticket-system/actions/workflows/ci.yml)
+
 ![Next.js](https://img.shields.io/badge/Next.js-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks by **Team 64bit**. Powered by Next.js App Router, PostgreSQL, and Prisma.
+An enterprise-grade, full-stack Customer Support Ticket Management System built for Freshworks. Developed as part of the Kalvium Software Product Engineering program by **Team 64bit**. Powered by Next.js App Router, PostgreSQL, and Prisma.
 
 > **Team:** Om Jagtap (Backend) · Shruti Itkalkar (Frontend) · Aayushman Shukla (Middleware & Testing)
 
-We have comprehensive guides available for all aspects of the system:
-- [Architecture Guide](./docs/architecture.md)
-- [API Documentation](./docs/api-guide.md)
-- [Deployment Checklist](./docs/deployment.md)
+## Problem Statement
+
+Support teams require a centralized, secure, and structured environment to track, prioritize, and resolve customer inquiries. Generic communication tools lack the necessary workflows, such as issue status tracking, agent assignment, internal team notes, and structured role separation. This project solves that by providing a dedicated ticketing platform with tailored interfaces for Admins, Agents, and Customers, ensuring that no customer issue falls through the cracks and support performance can be monitored.
 
 ## Key Features
 
@@ -57,7 +58,19 @@ We have comprehensive guides available for all aspects of the system:
 
 ## 📖 Documentation Directory
 
-We have comprehensive guides available for all aspects of the system.
+We have comprehensive guides available for all aspects of the system. Please refer to the following documents for detailed insights:
+
+| Document | Description |
+|---|---|
+| [**Project Overview**](./docs/project-overview.md) | High-level summary of objectives, features, and final project capabilities. |
+| [**Architecture**](./docs/architecture.md) | Monorepo structure, BFF pattern, and technology decoupling details. |
+| [**Ticket Module**](./docs/ticket-module.md) | Core logic and REST APIs for the ticket system. |
+| [**Ticket Lifecycle**](./docs/ticket-lifecycle.md) | Detailed workflows for ticket statuses and assignments. |
+| [**Replies & Chat**](./docs/replies-chat.md) | Threaded conversations and internal agent notes. |
+| [**Authentication**](./docs/authentication.md) | JWT implementation and secure session management. |
+| [**Authorization**](./docs/authorization.md) | Strict Role-Based Access Control (RBAC) details. |
+| [**Database Schema**](./docs/database.md) | Explanation of the Prisma ORM models and relationships. |
+| [**API Guide**](./docs/api-guide.md) | Comprehensive backend API endpoints documentation. |
 
 ---
 
@@ -233,30 +246,7 @@ The easiest way to test all three roles:
 
 ## Contributing
 
-1. Fork the repository and create a feature branch.
-2. Use descriptive branch names such as `feature/your-feature` or `fix/bug-name`.
-3. Keep changes focused and document significant updates.
-4. Test your changes locally before opening a pull request.
-5. Submit a pull request with a clear summary of the change.
-
-### Branch Naming
-
-| Branch prefix | Purpose |
-|---|---|
-| `main` | Stable, production-ready code |
-| `feature/*` | New feature development |
-| `fix/*` | Bug fixes |
-| `docs/*` | Documentation updates |
-
-### Creating a PR
-
-```bash
-git checkout -b feature/your-feature-name
-git add .
-git commit -m "feat: describe your change"
-git push origin feature/your-feature-name
-# Open a Pull Request on GitHub targeting main
-```
+Please read the [CONTRIBUTING.md](./CONTRIBUTING.md) file for details on our code of conduct, and the process for submitting pull requests to us.
 
 ---
 

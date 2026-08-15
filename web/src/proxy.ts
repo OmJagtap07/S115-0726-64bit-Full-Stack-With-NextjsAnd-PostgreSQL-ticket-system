@@ -5,7 +5,7 @@ import { jwtVerify } from 'jose';
 // Define the public routes that do not require authentication
 const publicRoutes = ['/login', '/register', '/api/auth/login', '/api/auth/register', '/api/auth/refresh-token'];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow static files and Next.js internals

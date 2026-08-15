@@ -1,7 +1,8 @@
 import React from 'react';
 import { Rocket, Sparkles, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 interface ComingSoonProps {
   title: string;
@@ -30,12 +31,16 @@ export function ComingSoon({
         {description}
       </p>
       
-      <Button asChild size="lg" className="rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Dashboard
-        </Link>
-      </Button>
+      <Link 
+        href="/dashboard" 
+        className={cn(
+          buttonVariants({ size: "lg" }),
+          "rounded-full shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5 flex items-center gap-2"
+        )}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Dashboard
+      </Link>
     </div>
   );
 }

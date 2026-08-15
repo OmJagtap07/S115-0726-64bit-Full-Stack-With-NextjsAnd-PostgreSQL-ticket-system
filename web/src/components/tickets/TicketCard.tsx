@@ -57,14 +57,16 @@ export function TicketCard({ ticket, agents, isAdmin }: TicketCardProps) {
     ticket.priority === 'MEDIUM' ? 'priorityMedium' : 'priorityLow';
   
   const statusVariant = 
+    ticket.status === 'UNASSIGNED' ? 'secondary' :
     ticket.status === 'OPEN' ? 'statusOpen' :
     ticket.status === 'IN_PROGRESS' ? 'statusProgress' :
-    ticket.status === 'RESOLVED' ? 'statusOnHold' : 'statusClosed';
+    'statusClosed';
 
   const statusLabel = 
+    ticket.status === 'UNASSIGNED' ? 'Unassigned' :
     ticket.status === 'OPEN' ? 'Open' :
     ticket.status === 'IN_PROGRESS' ? 'In Progress' :
-    ticket.status === 'RESOLVED' ? 'Resolved' : 'Closed';
+    'Closed';
     
   const priorityLabel = ticket.priority.charAt(0) + ticket.priority.slice(1).toLowerCase();
 

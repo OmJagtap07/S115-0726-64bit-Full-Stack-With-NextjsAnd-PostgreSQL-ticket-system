@@ -35,10 +35,11 @@ export function InviteAgentModal() {
 
   const filteredCustomers = useMemo(() => {
     if (!customers) return [];
-    return customers.filter(c => 
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      c.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return customers.filter(c => {
+      const nameMatch = (c.name || '').toLowerCase().includes((searchQuery || '').toLowerCase());
+      const emailMatch = (c.email || '').toLowerCase().includes((searchQuery || '').toLowerCase());
+      return nameMatch || emailMatch;
+    });
   }, [customers, searchQuery]);
 
   // Mutations
@@ -97,12 +98,12 @@ export function InviteAgentModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger render={
         <Button className="shrink-0 gap-1.5">
           <UserCog className="w-4 h-4" />
           Invite Agent
         </Button>
-      </DialogTrigger>
+      } />
       
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

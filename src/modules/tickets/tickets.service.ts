@@ -29,17 +29,16 @@ export class TicketsService {
     if (currentStatus === newStatus) return;
 
     if (user.role === Role.CUSTOMER) {
-      if (currentStatus === TicketStatus.RESOLVED && newStatus === TicketStatus.CLOSED) return;
-      throw new ConflictError('Customers can only transition a RESOLVED ticket to CLOSED.');
+      if ((currentStatus === TicketStatus.OPEN || currentStatus === TicketStatus.IN_PROGRESS) && newStatus === TicketStatus.CLOSED) return;
+      throw new ConflictError('Customers can only transition a ticket to CLOSED.');
     }
 
     if (user.role === Role.AGENT || user.role === Role.ADMIN) {
-      // Treat OPEN + assigneeId != null as ASSIGNED
-      if (currentStatus === TicketStatus.OPEN && assigneeId !== null && newStatus === TicketStatus.IN_PROGRESS) return;
-      
-      if (currentStatus === TicketStatus.IN_PROGRESS && newStatus === TicketStatus.RESOLVED) return;
+      if (currentStatus === TicketStatus.UNASSIGNED && newStatus === TicketStatus.OPEN) return;
+      if (currentStatus === TicketStatus.OPEN && newStatus === TicketStatus.IN_PROGRESS) return;
+      if (currentStatus === TicketStatus.IN_PROGRESS && newStatus === TicketStatus.CLOSED) return;
 
-      throw new ConflictError('Agents can only transition tickets from ASSIGNED to IN_PROGRESS, or IN_PROGRESS to RESOLVED.');
+      throw new ConflictError('Agents can only transition tickets from UNASSIGNED to OPEN, OPEN to IN_PROGRESS, or IN_PROGRESS to CLOSED.');
     }
 
     throw new ConflictError('Invalid state transition.');
@@ -108,10 +107,6 @@ export class TicketsService {
       details: `Status changed from ${ticket.status} to ${data.status}`,
     });
 
-    if (data.status === TicketStatus.RESOLVED) {
-      // Notification removed
-    }
-
     return updated;
   }
 
@@ -120,8 +115,8 @@ export class TicketsService {
     if (!ticket) throw new NotFoundError('Ticket not found');
     this.authorizeTicketAccess(user, ticket);
 
-    if (ticket.status === TicketStatus.RESOLVED || ticket.status === TicketStatus.CLOSED) {
-      throw new ConflictError('Cannot assign a resolved or closed ticket.');
+    if (ticket.status === TicketStatus.CLOSED) {
+      throw new ConflictError('Cannot assign a closed ticket.');
     }
 
     const targetUser = await userRepo.findById(data.assigneeId);
@@ -131,7 +126,8 @@ export class TicketsService {
 
     const type = ticket.assigneeId ? ActivityType.REASSIGNED : ActivityType.ASSIGNED;
 
-    const updated = await ticketRepo.update(ticketId, { assigneeId: data.assigneeId });
+    const newStatus = ticket.status === TicketStatus.UNASSIGNED ? TicketStatus.OPEN : ticket.status;
+    const updated = await ticketRepo.update(ticketId, { assigneeId: data.assigneeId, status: newStatus });
 
     await activityRepo.create({
       ticketId,
@@ -139,6 +135,15 @@ export class TicketsService {
       type,
       details: `Assigned to ${data.assigneeId}`,
     });
+    
+    if (newStatus !== ticket.status) {
+      await activityRepo.create({
+        ticketId,
+        actorId: user.userId,
+        type: ActivityType.STATUS_CHANGED,
+        details: `Status automatically changed from ${ticket.status} to ${newStatus} upon assignment`,
+      });
+    }
 
     return updated;
   }
@@ -177,8 +182,8 @@ export class TicketsService {
     if (!ticket) throw new NotFoundError('Ticket not found');
     this.authorizeTicketAccess(user, ticket);
 
-    if (ticket.status === TicketStatus.CLOSED || ticket.status === TicketStatus.RESOLVED) {
-      throw new ConflictError('Cannot reply to a resolved or closed ticket.');
+    if (ticket.status === TicketStatus.CLOSED) {
+      throw new ConflictError('Cannot reply to a closed ticket.');
     }
 
     if (!data.message && !file) {
@@ -237,6 +242,17 @@ export class TicketsService {
       // Agent or Admin replied - notification removed
     }
 
+    // Auto transition OPEN to IN_PROGRESS upon first agent reply
+    if (!isInternal && user.role === Role.AGENT && ticket.status === TicketStatus.OPEN) {
+      await ticketRepo.update(ticketId, { status: TicketStatus.IN_PROGRESS });
+      await activityRepo.create({
+        ticketId,
+        actorId: user.userId,
+        type: ActivityType.STATUS_CHANGED,
+        details: 'Status automatically changed from OPEN to IN_PROGRESS upon agent reply',
+      });
+    }
+
     // We must return the reply with the attachment included, so we refetch it if file exists
     if (file) {
       const replies = await replyRepo.findAllByTicket(ticketId);
@@ -275,15 +291,14 @@ export class TicketsService {
     if (user.role === Role.ADMIN) {
       const [totalOpen, unassigned, assigned] = await Promise.all([
         prisma.ticket.count({ where: { status: 'OPEN', deletedAt: null } }),
-        prisma.ticket.count({ where: { assigneeId: null, deletedAt: null } }),
+        prisma.ticket.count({ where: { status: 'UNASSIGNED', deletedAt: null } }),
         prisma.ticket.count({ where: { assigneeId: { not: null }, deletedAt: null } }),
       ]);
       return { totalOpen, unassigned, assigned };
     }
 
     if (user.role === Role.AGENT) {
-      // Resolved Today: updated today and status = RESOLVED? Wait, let's just count RESOLVED tickets assigned to this agent where closedAt is not set, or updated today.
-      // Easiest is just checking status = RESOLVED and updatedAt >= start of day.
+      // Resolved Today: updated today and status = CLOSED
       const startOfDay = new Date();
       startOfDay.setHours(0, 0, 0, 0);
 
@@ -293,7 +308,7 @@ export class TicketsService {
         prisma.ticket.count({ 
           where: { 
             assigneeId: user.userId, 
-            status: 'RESOLVED', 
+            status: 'CLOSED', 
             updatedAt: { gte: startOfDay },
             deletedAt: null 
           } 
@@ -303,12 +318,13 @@ export class TicketsService {
     }
 
     if (user.role === Role.CUSTOMER) {
-      const [myTickets, openRequests, recentlyResolved] = await Promise.all([
+      const [myTickets, unassigned, openRequests, recentlyResolved] = await Promise.all([
         prisma.ticket.count({ where: { customerId: user.userId, deletedAt: null } }),
+        prisma.ticket.count({ where: { customerId: user.userId, status: 'UNASSIGNED', deletedAt: null } }),
         prisma.ticket.count({ where: { customerId: user.userId, status: 'OPEN', deletedAt: null } }),
-        prisma.ticket.count({ where: { customerId: user.userId, status: 'RESOLVED', deletedAt: null } }),
+        prisma.ticket.count({ where: { customerId: user.userId, status: 'CLOSED', deletedAt: null } }),
       ]);
-      return { myTickets, openRequests, recentlyResolved };
+      return { myTickets, openRequests: unassigned + openRequests, recentlyResolved };
     }
 
     return {};

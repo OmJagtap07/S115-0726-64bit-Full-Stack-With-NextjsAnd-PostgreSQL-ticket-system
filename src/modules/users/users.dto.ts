@@ -19,8 +19,26 @@ export const updateUserSchema = z.object({
     name: z.string().min(2).optional(),
     isActive: z.boolean().optional(),
     role: z.enum(['ADMIN', 'AGENT', 'CUSTOMER']).optional(),
+    phoneNumber: z.string().optional(),
+    employeeId: z.string().optional(),
+    timezone: z.string().optional(),
+    location: z.string().optional(),
+    avatarUrl: z.string().optional(),
+  }),
+});
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Current password is required'),
+    newPassword: z.string()
+      .min(8)
+      .regex(/[A-Z]/, 'Must contain uppercase')
+      .regex(/[a-z]/, 'Must contain lowercase')
+      .regex(/[0-9]/, 'Must contain number')
+      .regex(/[\W_]/, 'Must contain special character'),
   }),
 });
 
 export type CreateUserDto = z.infer<typeof createUserSchema>['body'];
 export type UpdateUserDto = z.infer<typeof updateUserSchema>['body'];
+export type ChangePasswordDto = z.infer<typeof changePasswordSchema>['body'];

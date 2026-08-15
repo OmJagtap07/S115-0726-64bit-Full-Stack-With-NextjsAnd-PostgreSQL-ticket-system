@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { UsersController } from './users.controller';
 import { validateRequest } from '../../core/middlewares/validateRequest';
 import { requireAuth, requireRole } from '../../core/middlewares/requireAuth';
-import { createUserSchema, updateUserSchema } from './users.dto';
+import { createUserSchema, updateUserSchema, changePasswordSchema } from './users.dto';
 
 const router = Router();
 
@@ -12,6 +12,7 @@ router.use(requireAuth);
 // User Profiles & Agents (Accessible to all authenticated users)
 router.get('/me', UsersController.getMe);
 router.get('/agents', UsersController.getAgents);
+router.post('/change-password', validateRequest(changePasswordSchema), UsersController.changePassword);
 
 // User Management (Admin only)
 router.post('/', requireRole(['ADMIN']), validateRequest(createUserSchema), UsersController.createUser);
